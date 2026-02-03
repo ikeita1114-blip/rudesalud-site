@@ -213,7 +213,7 @@ export default function Page() {
                     {img.alt} (placeholder)
                   </div>
                   {/* 画像を置いたら下の Image を有効に（ファイル名一致させる） */}
-                   <Image src={img.src} alt={img.alt} fill className="object-cover" /> 
+                   <Image src={img.src} alt={img.alt} fill className="object-contain" /> 
                 </div>
               ))}
             </div>
