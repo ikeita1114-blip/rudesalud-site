@@ -115,7 +115,7 @@ export default function Page() {
                 <div className="rounded-xl border border-white/10 bg-black/40 p-4">
                   <div className="text-xs tracking-[0.25em] text-white/60">GOAL</div>
                   <div className="mt-2 text-lg font-semibold">
-                    High brand → Outlet store 확보
+                    High brand → Outlet store 
                   </div>
                   <div className="mt-2 text-sm text-white/70">
                     未来は“店舗で体験できる世界観”へ。
