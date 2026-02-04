@@ -9,9 +9,9 @@ const TAGLINE = "RUDE BUT BEAUTIFUL.  CONTRADICTION AS IDENTITY.";
 
 const product = {
   name: "Checker Heart Tee",
-  price: "¥7,900",
+  price: "¥12,800",
   sizes: ["M", "L"],
-  sizeRatio: "M : L = 3 : 7",
+  sizeRatio: "M : L",
   material: "Polyester 50% / Urethane 50%",
   description:
     "反骨と上品さが同居する、RUDESALUDの象徴的グラフィック。荒さの中に、美しさを。",
