@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const BRAND = "RUDESALUD";
 const TAGLINE = "RUDE BUT BEAUTIFUL.  CONTRADICTION AS IDENTITY.";
@@ -44,9 +44,96 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** ====== Opening (Splash) ====== */
+function Opening({
+  onFinish,
+}: {
+  onFinish: () => void;
+}) {
+  const [phase, setPhase] = useState<"enter" | "exit">("enter");
+
+  useEffect(() => {
+    // enter: 0.0s〜
+    // exit: 2.0s〜 でフェードアウト開始
+    // finish: 2.8s〜 で完了
+    const t1 = window.setTimeout(() => setPhase("exit"), 2000);
+    const t2 = window.setTimeout(() => onFinish(), 2800);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [onFinish]);
+
+  const skip = () => {
+    // スキップしたら即終了
+    onFinish();
+  };
+
+  return (
+    <div
+      onClick={skip}
+      onTouchStart={skip}
+      className={[
+        "fixed inset-0 z-[999] flex items-center justify-center bg-black",
+        "transition-opacity duration-700",
+        phase === "exit" ? "opacity-0" : "opacity-100",
+      ].join(" ")}
+    >
+      {/* subtle glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute bottom-[-200px] right-[-200px] h-[520px] w-[520px] rounded-full bg-white/5 blur-3xl" />
+      </div>
+
+      <div className="relative px-6 text-center">
+        {/* Brand */}
+        <div
+          className={[
+            "text-4xl font-semibold tracking-[0.22em] md:text-6xl",
+            "transition-all duration-700 ease-out",
+            phase === "exit"
+              ? "opacity-0 translate-y-2"
+              : "opacity-100 translate-y-0",
+          ].join(" ")}
+          style={{ transitionDelay: "100ms" }}
+        >
+          {BRAND}
+        </div>
+
+        {/* Tagline */}
+        <div
+          className={[
+            "mt-5 text-xs tracking-[0.28em] text-white/60 md:text-sm",
+            "transition-all duration-700 ease-out",
+            phase === "exit"
+              ? "opacity-0 translate-y-2"
+              : "opacity-100 translate-y-0",
+          ].join(" ")}
+          style={{ transitionDelay: "450ms" }}
+        >
+          {TAGLINE}
+        </div>
+
+        {/* Hint */}
+        <div
+          className={[
+            "mt-10 text-[11px] tracking-[0.25em] text-white/35",
+            "transition-opacity duration-700",
+            phase === "exit" ? "opacity-0" : "opacity-100",
+          ].join(" ")}
+          style={{ transitionDelay: "900ms" }}
+        >
+          TAP TO SKIP
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<Category>("tshirt");
+  const [showOpening, setShowOpening] = useState(true);
 
   const categoryLabel = useMemo(
     () => categories.find((c) => c.key === category)?.label ?? "Category",
@@ -55,6 +142,9 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-black text-white">
+      {/* ====== Opening Overlay ====== */}
+      {showOpening && <Opening onFinish={() => setShowOpening(false)} />}
+
       {/* ====== Top gradient / grain ====== */}
       <div className="pointer-events-none fixed inset-0 opacity-40">
         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
@@ -332,7 +422,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* ====== Category switch area ====== */}
           <div className="mt-10">
             {category === "tshirt" ? (
               <div className="grid gap-6 md:grid-cols-2">
@@ -434,7 +523,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* ====== Story / Packaging vibe ====== */}
+      {/* ====== Story ====== */}
       <section id="story" className="border-t border-white/10">
         <div className="mx-auto max-w-6xl px-5 py-16">
           <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
