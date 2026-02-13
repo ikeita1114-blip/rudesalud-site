@@ -576,10 +576,22 @@ export default function Page() {
 
         {/* ====== Footer ====== */}
         <footer className="border-t border-white/10 py-10">
-          <div className="mx-auto max-w-6xl px-5 text-xs text-white/50">
-            Built with Next.js + Vercel. Updates are deployed automatically on push.
-          </div>
-        </footer>
+  <div className="mx-auto max-w-6xl px-5 text-xs text-white/50 space-y-3">
+    <div>
+      Built with Next.js + Vercel. Updates are deployed automatically on push.
+    </div>
+
+    <div className="flex gap-6">
+      <a href="/legal" className="hover:text-white">
+        特定商取引法に基づく表記
+      </a>
+      <a href="/legal" className="hover:text-white">
+        プライバシーポリシー
+      </a>
+    </div>
+  </div>
+</footer>
+
       </main>
     </>
   );
