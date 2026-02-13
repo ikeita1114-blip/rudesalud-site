@@ -44,7 +44,7 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-type SplashPhase = "in" | "hold" | "out" | "done";
+type SplashPhase = "in" | "hold" | "out";
 
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,13 +56,13 @@ export default function Page() {
   const FADE_OUT_MS = 900;
 
   const [phase, setPhase] = useState<SplashPhase>("in");
+  const [splashMounted, setSplashMounted] = useState(true);
 
   useEffect(() => {
-    // in -> hold -> out -> done
     const t1 = setTimeout(() => setPhase("hold"), FADE_IN_MS);
     const t2 = setTimeout(() => setPhase("out"), FADE_IN_MS + HOLD_MS);
     const t3 = setTimeout(
-      () => setPhase("done"),
+      () => setSplashMounted(false),
       FADE_IN_MS + HOLD_MS + FADE_OUT_MS
     );
 
@@ -71,6 +71,7 @@ export default function Page() {
       clearTimeout(t2);
       clearTimeout(t3);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const categoryLabel = useMemo(
@@ -78,21 +79,25 @@ export default function Page() {
     [category]
   );
 
-  const showSplash = phase !== "done";
-  const splashOpacity =
-    phase === "in" || phase === "hold" ? "opacity-100" : "opacity-0";
+  const splashOpacity = phase === "out" ? "opacity-0" : "opacity-100";
 
   return (
     <>
-      {/* ===== Splash (fade in/out) ===== */}
-      {showSplash && (
+      {/* ===== Splash (fade in -> hold -> fade out) ===== */}
+      {splashMounted && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black">
           <div
             className={`transition-opacity ${splashOpacity}`}
-            style={{ transitionDuration: `${phase === "out" ? FADE_OUT_MS : FADE_IN_MS}ms` }}
+            style={{
+              transitionDuration: `${
+                phase === "out" ? FADE_OUT_MS : FADE_IN_MS
+              }ms`,
+            }}
           >
             <div className="text-center">
-              <div className="text-xs tracking-[0.5em] text-white/60">OFFICIAL</div>
+              <div className="text-xs tracking-[0.5em] text-white/60">
+                OFFICIAL
+              </div>
               <div className="mt-3 text-5xl font-semibold tracking-[0.22em] text-white">
                 RUDE<span className="text-white/60">SALUD</span>
               </div>
@@ -176,7 +181,9 @@ export default function Page() {
             {/* panel */}
             <aside className="absolute left-0 top-0 h-full w-[86%] max-w-sm border-r border-white/10 bg-black/90 p-5 backdrop-blur">
               <div className="flex items-center justify-between">
-                <div className="text-xs tracking-[0.3em] text-white/60">MENU</div>
+                <div className="text-xs tracking-[0.3em] text-white/60">
+                  MENU
+                </div>
                 <button
                   className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10"
                   onClick={() => setMenuOpen(false)}
@@ -210,6 +217,35 @@ export default function Page() {
                       <span className="text-white/40">→</span>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="mt-10">
+                <div className="text-xs tracking-[0.25em] text-white/60">
+                  LINKS
+                </div>
+                <div className="mt-3 grid gap-2">
+                  <a
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
+                    href="#concept"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Concept
+                  </a>
+                  <a
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
+                    href="#story"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Story
+                  </a>
+                  <a
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
+                    href="#contact"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Contact
+                  </a>
                 </div>
               </div>
             </aside>
@@ -309,246 +345,242 @@ export default function Page() {
           </div>
         </section>
 
-        {/* 以降（Concept/Product/Story/Contact/Footer）はあなたの既存コードのままでOK */}
-      </main>
-    </>
-  );
-}
+        {/* ====== Concept ====== */}
+        <section id="concept" className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-5 py-16">
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              Concept
+            </h2>
+            <p className="mt-4 max-w-3xl text-white/70">
+              RUDESALUDは「矛盾」をテーマに、ストリートの荒さと、上質さの余韻を同居させます。
+              反骨があるのに、品がある。強いのに、繊細。相反する要素がぶつかる瞬間に、美しさが立ち上がる。
+            </p>
 
-
-      {/* ====== Concept ====== */}
-      <section id="concept" className="border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-5 py-16">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            Concept
-          </h2>
-          <p className="mt-4 max-w-3xl text-white/70">
-            RUDESALUDは「矛盾」をテーマに、ストリートの荒さと、上質さの余韻を同居させます。
-            反骨があるのに、品がある。強いのに、繊細。相反する要素がぶつかる瞬間に、美しさが立ち上がる。
-          </p>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {[
-              { t: "RUDE", d: "荒さ・反骨・ストリート感" },
-              { t: "SALUD", d: "上品さ・静けさ・余韻" },
-              { t: "CONTRADICTION", d: "矛盾をアイデンティティにする" },
-            ].map((c) => (
-              <div
-                key={c.t}
-                className="rounded-2xl border border-white/10 bg-white/5 p-6"
-              >
-                <div className="text-xs tracking-[0.3em] text-white/60">{c.t}</div>
-                <div className="mt-3 text-lg font-semibold">{c.d}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ====== Product ====== */}
-      <section id="product" className="border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-5 py-16">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                {category === "tshirt" ? "First Drop" : "Category"}
-              </h2>
-              <p className="mt-3 max-w-2xl text-white/70">
-                {category === "tshirt"
-                  ? "まずはTシャツから。ブランドの核になるグラフィックを、黒に落とし込む。"
-                  : "選択中のカテゴリは準備中です。"}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Pill>{categoryLabel}</Pill>
-              <Pill>{product.material}</Pill>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            {category === "tshirt" ? (
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Images */}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {product.images.map((img) => (
-                    <div
-                      key={img.src}
-                      className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-black"
-                    >
-                      <Image
-                        src={img.src}
-                        alt={img.alt}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  ))}
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {[
+                { t: "RUDE", d: "荒さ・反骨・ストリート感" },
+                { t: "SALUD", d: "上品さ・静けさ・余韻" },
+                { t: "CONTRADICTION", d: "矛盾をアイデンティティにする" },
+              ].map((c) => (
+                <div
+                  key={c.t}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-6"
+                >
+                  <div className="text-xs tracking-[0.3em] text-white/60">{c.t}</div>
+                  <div className="mt-3 text-lg font-semibold">{c.d}</div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                {/* Info */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
-                  <div className="text-xs tracking-[0.25em] text-white/60">
-                    PRODUCT
-                  </div>
-                  <h3 className="mt-2 text-2xl font-semibold">{product.name}</h3>
-                  <div className="mt-2 text-white/70">{product.price}</div>
+        {/* ====== Product ====== */}
+        <section id="product" className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-5 py-16">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                  {category === "tshirt" ? "First Drop" : "Category"}
+                </h2>
+                <p className="mt-3 max-w-2xl text-white/70">
+                  {category === "tshirt"
+                    ? "まずはTシャツから。ブランドの核になるグラフィックを、黒に落とし込む。"
+                    : "選択中のカテゴリは準備中です。"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Pill>{categoryLabel}</Pill>
+                <Pill>{product.material}</Pill>
+              </div>
+            </div>
 
-                  <p className="mt-6 text-white/70">{product.description}</p>
-
-                  <div className="mt-8 grid gap-3">
-                    <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs tracking-[0.25em] text-white/60">
-                        SIZES
+            <div className="mt-10">
+              {category === "tshirt" ? (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Images */}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {product.images.map((img) => (
+                      <div
+                        key={img.src}
+                        className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-black"
+                      >
+                        <Image
+                          src={img.src}
+                          alt={img.alt}
+                          fill
+                          className="object-contain"
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          priority={false}
+                        />
                       </div>
-                      <div className="mt-2 text-sm text-white/80">
-                        {product.sizes.join(" / ")}{" "}
-                        <span className="text-white/50">({product.sizeRatio})</span>
+                    ))}
+                  </div>
+
+                  {/* Info */}
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8">
+                    <div className="text-xs tracking-[0.25em] text-white/60">
+                      PRODUCT
+                    </div>
+                    <h3 className="mt-2 text-2xl font-semibold">{product.name}</h3>
+                    <div className="mt-2 text-white/70">{product.price}</div>
+
+                    <p className="mt-6 text-white/70">{product.description}</p>
+
+                    <div className="mt-8 grid gap-3">
+                      <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+                        <div className="text-xs tracking-[0.25em] text-white/60">
+                          SIZES
+                        </div>
+                        <div className="mt-2 text-sm text-white/80">
+                          {product.sizes.join(" / ")}{" "}
+                          <span className="text-white/50">({product.sizeRatio})</span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+                        <div className="text-xs tracking-[0.25em] text-white/60">
+                          MATERIAL
+                        </div>
+                        <div className="mt-2 text-sm text-white/80">
+                          {product.material}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs tracking-[0.25em] text-white/60">
-                        MATERIAL
-                      </div>
-                      <div className="mt-2 text-sm text-white/80">
-                        {product.material}
-                      </div>
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                      <button
+                        className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black opacity-60"
+                        title="決済は後でStripe導入で実装します"
+                        disabled
+                      >
+                        Coming Soon (Checkout)
+                      </button>
+                      <a
+                        href="#contact"
+                        className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-semibold text-white/90 hover:bg-white/10"
+                      >
+                        Restock / Inquiry
+                      </a>
                     </div>
-                  </div>
 
-                  <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                    <button
-                      className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black opacity-60"
-                      title="決済は後でStripe導入で実装します"
-                      disabled
-                    >
-                      Coming Soon (Checkout)
-                    </button>
+                    <p className="mt-3 text-xs text-white/50">
+                      ※ いまはデザイン優先の仮サイト。Stripe決済は後で追加できます。
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center">
+                  <div className="text-xs tracking-[0.3em] text-white/60">
+                    COMING SOON
+                  </div>
+                  <div className="mt-3 text-2xl font-semibold">{categoryLabel}</div>
+                  <p className="mx-auto mt-3 max-w-xl text-white/70">
+                    このカテゴリは現在準備中です。次のドロップをお待ちください。
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2">
                     <a
                       href="#contact"
-                      className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-semibold text-white/90 hover:bg-white/10"
+                      className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-white/90"
                     >
-                      Restock / Inquiry
+                      Get notified
                     </a>
+                    <button
+                      onClick={() => setCategory("tshirt")}
+                      className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10"
+                    >
+                      Back to T-Shirt
+                    </button>
                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
-                  <p className="mt-3 text-xs text-white/50">
-                    ※ いまはデザイン優先の仮サイト。Stripe決済は後で追加できます。
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center">
-                <div className="text-xs tracking-[0.3em] text-white/60">
-                  COMING SOON
-                </div>
-                <div className="mt-3 text-2xl font-semibold">{categoryLabel}</div>
-                <p className="mx-auto mt-3 max-w-xl text-white/70">
-                  このカテゴリは現在準備中です。次のドロップをお待ちください。
+        {/* ====== Story ====== */}
+        <section id="story" className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-5 py-16">
+            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+              Story
+            </h2>
+            <div className="mt-4 grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <div className="text-xs tracking-[0.25em] text-white/60">WORLD</div>
+                <p className="mt-3 text-white/70">
+                  黒、ざらつき、紙の質感、証明書のようなタイポ。<br />
+                  “本物っぽい”演出と、少し危うい余韻を残す。
                 </p>
-                <div className="mt-6 inline-flex items-center gap-2">
-                  <a
-                    href="#contact"
-                    className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black hover:bg-white/90"
-                  >
-                    Get notified
-                  </a>
-                  <button
-                    onClick={() => setCategory("tshirt")}
-                    className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white/90 hover:bg-white/10"
-                  >
-                    Back to T-Shirt
-                  </button>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <Pill>Black</Pill>
+                  <Pill>Vintage</Pill>
+                  <Pill>Certificate</Pill>
+                  <Pill>Minimal</Pill>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </section>
 
-      {/* ====== Story ====== */}
-      <section id="story" className="border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-5 py-16">
-          <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            Story
-          </h2>
-          <div className="mt-4 grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <div className="text-xs tracking-[0.25em] text-white/60">WORLD</div>
-              <p className="mt-3 text-white/70">
-                黒、ざらつき、紙の質感、証明書のようなタイポ。<br />
-                “本物っぽい”演出と、少し危うい余韻を残す。
-              </p>
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Pill>Black</Pill>
-                <Pill>Vintage</Pill>
-                <Pill>Certificate</Pill>
-                <Pill>Minimal</Pill>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <div className="text-xs tracking-[0.25em] text-white/60">NEXT</div>
-              <ul className="mt-3 space-y-2 text-white/70">
-                <li>・カテゴリ増やす（ジャケット等）</li>
-                <li>・商品一覧ページ（複数アイテム化）</li>
-                <li>・問い合わせフォーム or Instagram導線</li>
-                <li>・Stripe決済（後で導入）</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ====== Contact ====== */}
-      <section id="contact" className="border-t border-white/10">
-        <div className="mx-auto max-w-6xl px-5 py-16">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                Contact
-              </h2>
-              <p className="mt-3 max-w-xl text-white/70">
-                いまは仮導線です。SNSやメールが決まったらリンクを差し替えます。
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                {links.map((l) => (
-                  <a
-                    key={l.label}
-                    href={l.href}
-                    className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/90 hover:bg-white/10"
-                  >
-                    {l.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 md:max-w-md">
-              <div className="text-xs tracking-[0.25em] text-white/60">INFO</div>
-              <div className="mt-3 text-sm text-white/80">ブランド名：{BRAND}</div>
-              <div className="mt-2 text-sm text-white/80">
-                コンセプト：不良っぽいけど美しく（矛盾）
-              </div>
-              <div className="mt-2 text-sm text-white/80">
-                目標：ハイブランド化 / アウトレット店舗確保
-              </div>
-
-              <div className="mt-6 text-xs text-white/50">
-                © {new Date().getFullYear()} {BRAND}. All rights reserved.
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <div className="text-xs tracking-[0.25em] text-white/60">NEXT</div>
+                <ul className="mt-3 space-y-2 text-white/70">
+                  <li>・カテゴリ増やす（ジャケット等）</li>
+                  <li>・商品一覧ページ（複数アイテム化）</li>
+                  <li>・問い合わせフォーム or Instagram導線</li>
+                  <li>・Stripe決済（後で導入）</li>
+                </ul>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ====== Footer ====== */}
-      <footer className="border-t border-white/10 py-10">
-        <div className="mx-auto max-w-6xl px-5 text-xs text-white/50">
-          Built with Next.js + Vercel. Updates are deployed automatically on push.
-        </div>
-      </footer>
-    </main>
+        {/* ====== Contact ====== */}
+        <section id="contact" className="border-t border-white/10">
+          <div className="mx-auto max-w-6xl px-5 py-16">
+            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                  Contact
+                </h2>
+                <p className="mt-3 max-w-xl text-white/70">
+                  いまは仮導線です。SNSやメールが決まったらリンクを差し替えます。
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {links.map((l) => (
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/90 hover:bg-white/10"
+                    >
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 md:max-w-md">
+                <div className="text-xs tracking-[0.25em] text-white/60">INFO</div>
+                <div className="mt-3 text-sm text-white/80">ブランド名：{BRAND}</div>
+                <div className="mt-2 text-sm text-white/80">
+                  コンセプト：不良っぽいけど美しく（矛盾）
+                </div>
+                <div className="mt-2 text-sm text-white/80">
+                  目標：ハイブランド化 / アウトレット店舗確保
+                </div>
+
+                <div className="mt-6 text-xs text-white/50">
+                  © {new Date().getFullYear()} {BRAND}. All rights reserved.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ====== Footer ====== */}
+        <footer className="border-t border-white/10 py-10">
+          <div className="mx-auto max-w-6xl px-5 text-xs text-white/50">
+            Built with Next.js + Vercel. Updates are deployed automatically on push.
+          </div>
+        </footer>
+      </main>
+    </>
   );
 }
