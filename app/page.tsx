@@ -44,334 +44,277 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** ====== Opening (Splash) ====== */
-function Opening({
-  onFinish,
-}: {
-  onFinish: () => void;
-}) {
-  const [phase, setPhase] = useState<"enter" | "exit">("enter");
-
-  useEffect(() => {
-    // enter: 0.0s〜
-    // exit: 2.0s〜 でフェードアウト開始
-    // finish: 2.8s〜 で完了
-    const t1 = window.setTimeout(() => setPhase("exit"), 2000);
-    const t2 = window.setTimeout(() => onFinish(), 2800);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [onFinish]);
-
-  const skip = () => {
-    // スキップしたら即終了
-    onFinish();
-  };
-
-  return (
-    <div
-      onClick={skip}
-      onTouchStart={skip}
-      className={[
-        "fixed inset-0 z-[999] flex items-center justify-center bg-black",
-        "transition-opacity duration-700",
-        phase === "exit" ? "opacity-0" : "opacity-100",
-      ].join(" ")}
-    >
-      {/* subtle glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-40">
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-[-200px] right-[-200px] h-[520px] w-[520px] rounded-full bg-white/5 blur-3xl" />
-      </div>
-
-      <div className="relative px-6 text-center">
-        {/* Brand */}
-        <div
-          className={[
-            "text-4xl font-semibold tracking-[0.22em] md:text-6xl",
-            "transition-all duration-700 ease-out",
-            phase === "exit"
-              ? "opacity-0 translate-y-2"
-              : "opacity-100 translate-y-0",
-          ].join(" ")}
-          style={{ transitionDelay: "100ms" }}
-        >
-          {BRAND}
-        </div>
-
-        {/* Tagline */}
-        <div
-          className={[
-            "mt-5 text-xs tracking-[0.28em] text-white/60 md:text-sm",
-            "transition-all duration-700 ease-out",
-            phase === "exit"
-              ? "opacity-0 translate-y-2"
-              : "opacity-100 translate-y-0",
-          ].join(" ")}
-          style={{ transitionDelay: "450ms" }}
-        >
-          {TAGLINE}
-        </div>
-
-        {/* Hint */}
-        <div
-          className={[
-            "mt-10 text-[11px] tracking-[0.25em] text-white/35",
-            "transition-opacity duration-700",
-            phase === "exit" ? "opacity-0" : "opacity-100",
-          ].join(" ")}
-          style={{ transitionDelay: "900ms" }}
-        >
-          TAP TO SKIP
-        </div>
-      </div>
-    </div>
-  );
-}
+type SplashPhase = "in" | "hold" | "out" | "done";
 
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [category, setCategory] = useState<Category>("tshirt");
-  const [showOpening, setShowOpening] = useState(true);
+
+  // ===== Splash timing (ms) =====
+  const FADE_IN_MS = 900;
+  const HOLD_MS = 700;
+  const FADE_OUT_MS = 900;
+
+  const [phase, setPhase] = useState<SplashPhase>("in");
+
+  useEffect(() => {
+    // in -> hold -> out -> done
+    const t1 = setTimeout(() => setPhase("hold"), FADE_IN_MS);
+    const t2 = setTimeout(() => setPhase("out"), FADE_IN_MS + HOLD_MS);
+    const t3 = setTimeout(
+      () => setPhase("done"),
+      FADE_IN_MS + HOLD_MS + FADE_OUT_MS
+    );
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
 
   const categoryLabel = useMemo(
     () => categories.find((c) => c.key === category)?.label ?? "Category",
     [category]
   );
 
+  const showSplash = phase !== "done";
+  const splashOpacity =
+    phase === "in" || phase === "hold" ? "opacity-100" : "opacity-0";
+
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* ====== Opening Overlay ====== */}
-      {showOpening && <Opening onFinish={() => setShowOpening(false)} />}
-
-      {/* ====== Top gradient / grain ====== */}
-      <div className="pointer-events-none fixed inset-0 opacity-40">
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute bottom-[-200px] right-[-200px] h-[520px] w-[520px] rounded-full bg-white/5 blur-3xl" />
-      </div>
-
-      {/* ====== Header (Hamburger) ====== */}
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/65 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          {/* Left: hamburger + brand */}
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Open menu"
-              onClick={() => setMenuOpen(true)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/90 hover:bg-white/10"
-            >
-              <span className="text-xl leading-none">≡</span>
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-md border border-white/15 bg-white/5" />
-              <div className="leading-none">
-                <div className="text-sm tracking-[0.35em] text-white/80">
-                  OFFICIAL
-                </div>
-                <div className="text-lg font-semibold tracking-[0.18em]">
-                  {BRAND}
-                </div>
+    <>
+      {/* ===== Splash (fade in/out) ===== */}
+      {showSplash && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black">
+          <div
+            className={`transition-opacity ${splashOpacity}`}
+            style={{ transitionDuration: `${phase === "out" ? FADE_OUT_MS : FADE_IN_MS}ms` }}
+          >
+            <div className="text-center">
+              <div className="text-xs tracking-[0.5em] text-white/60">OFFICIAL</div>
+              <div className="mt-3 text-5xl font-semibold tracking-[0.22em] text-white">
+                RUDE<span className="text-white/60">SALUD</span>
+              </div>
+              <div className="mt-4 text-xs tracking-[0.22em] text-white/40">
+                {TAGLINE}
               </div>
             </div>
           </div>
-
-          {/* Center (desktop nav) */}
-          <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
-            <a className="hover:text-white" href="#concept">
-              Concept
-            </a>
-            <a className="hover:text-white" href="#product">
-              Product
-            </a>
-            <a className="hover:text-white" href="#story">
-              Story
-            </a>
-            <a className="hover:text-white" href="#contact">
-              Contact
-            </a>
-          </nav>
-
-          {/* Right: current category */}
-          <a
-            href="#product"
-            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/90 hover:bg-white/10"
-          >
-            {categoryLabel}
-          </a>
-        </div>
-      </header>
-
-      {/* ====== Slide-over Menu ====== */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40">
-          {/* backdrop */}
-          <button
-            aria-label="Close menu"
-            className="absolute inset-0 bg-black/70"
-            onClick={() => setMenuOpen(false)}
-          />
-          {/* panel */}
-          <aside className="absolute left-0 top-0 h-full w-[86%] max-w-sm border-r border-white/10 bg-black/90 p-5 backdrop-blur">
-            <div className="flex items-center justify-between">
-              <div className="text-xs tracking-[0.3em] text-white/60">MENU</div>
-              <button
-                className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10"
-                onClick={() => setMenuOpen(false)}
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="mt-6">
-              <div className="text-xs tracking-[0.25em] text-white/60">
-                CATEGORIES
-              </div>
-              <div className="mt-3 grid gap-2">
-                {categories.map((c) => (
-                  <button
-                    key={c.key}
-                    onClick={() => {
-                      setCategory(c.key);
-                      setMenuOpen(false);
-                      document
-                        .getElementById("product")
-                        ?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition ${
-                      category === c.key
-                        ? "border-white/30 bg-white/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-                    }`}
-                  >
-                    <span>{c.label}</span>
-                    <span className="text-white/40">→</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-10">
-              <div className="text-xs tracking-[0.25em] text-white/60">LINKS</div>
-              <div className="mt-3 grid gap-2">
-                <a
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
-                  href="#concept"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Concept
-                </a>
-                <a
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
-                  href="#story"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Story
-                </a>
-                <a
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
-                  href="#contact"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Contact
-                </a>
-              </div>
-            </div>
-          </aside>
         </div>
       )}
 
-      {/* ====== Hero ====== */}
-      <section className="relative">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
-          <div>
-            <div className="flex flex-wrap gap-2">
-              <Pill>Street × Elegance</Pill>
-              <Pill>Contradiction</Pill>
-              <Pill>First Drop</Pill>
-            </div>
-
-            <h1 className="mt-6 text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-              RUDE <span className="text-white/60">IS</span> BEAUTIFUL.
-            </h1>
-
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70">
-              「不良っぽいけど美しく」。相反する要素を1つに束ね、視線を奪う。
-              RUDESALUDは、矛盾を“個性”として成立させるブランド。
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#product"
-                className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-black hover:bg-white/90"
-              >
-                Explore Product
-              </a>
-              <a
-                href="#concept"
-                className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-semibold text-white/90 hover:bg-white/10"
-              >
-                Read Concept
-              </a>
-            </div>
-
-            <p className="mt-6 text-xs tracking-[0.2em] text-white/50">
-              {TAGLINE}
-            </p>
-          </div>
-
-          {/* right visual */}
-          <div className="relative">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-                  <div className="text-xs tracking-[0.25em] text-white/60">
-                    GOAL
-                  </div>
-                  <div className="mt-2 text-lg font-semibold">
-                    High brand → Outlet store
-                  </div>
-                  <div className="mt-2 text-sm text-white/70">
-                    未来は“店舗で体験できる世界観”へ。
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-black/40 p-4">
-                  <div className="text-xs tracking-[0.25em] text-white/60">
-                    DROP
-                  </div>
-                  <div className="mt-2 text-lg font-semibold">M / L only</div>
-                  <div className="mt-2 text-sm text-white/70">
-                    {product.sizeRatio}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <div className="text-xs tracking-[0.25em] text-white/60">
-                      MATERIAL
-                    </div>
-                    <div className="mt-2 text-base font-semibold">
-                      {product.material}
-                    </div>
-                  </div>
-                  <div className="text-sm text-white/70">Stretch / Comfort</div>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
-                <div className="text-xs tracking-[0.25em] text-white/60">NOTE</div>
-                <div className="mt-2 text-sm text-white/70">
-                  左上の≡からカテゴリを選べます。今はT-Shirtのみ表示、他はComing Soon。
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* ===== Main site ===== */}
+      <main className="min-h-screen bg-black text-white">
+        {/* ====== Top gradient / grain ====== */}
+        <div className="pointer-events-none fixed inset-0 opacity-40">
+          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute bottom-[-200px] right-[-200px] h-[520px] w-[520px] rounded-full bg-white/5 blur-3xl" />
         </div>
-      </section>
+
+        {/* ====== Header (Hamburger) ====== */}
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-black/65 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+            {/* Left: hamburger + brand */}
+            <div className="flex items-center gap-3">
+              <button
+                aria-label="Open menu"
+                onClick={() => setMenuOpen(true)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/90 hover:bg-white/10"
+              >
+                <span className="text-xl leading-none">≡</span>
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-md border border-white/15 bg-white/5" />
+                <div className="leading-none">
+                  <div className="text-sm tracking-[0.35em] text-white/80">
+                    OFFICIAL
+                  </div>
+                  <div className="text-lg font-semibold tracking-[0.18em]">
+                    {BRAND}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center (desktop nav) */}
+            <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
+              <a className="hover:text-white" href="#concept">
+                Concept
+              </a>
+              <a className="hover:text-white" href="#product">
+                Product
+              </a>
+              <a className="hover:text-white" href="#story">
+                Story
+              </a>
+              <a className="hover:text-white" href="#contact">
+                Contact
+              </a>
+            </nav>
+
+            {/* Right: current category */}
+            <a
+              href="#product"
+              className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/90 hover:bg-white/10"
+            >
+              {categoryLabel}
+            </a>
+          </div>
+        </header>
+
+        {/* ====== Slide-over Menu ====== */}
+        {menuOpen && (
+          <div className="fixed inset-0 z-40">
+            {/* backdrop */}
+            <button
+              aria-label="Close menu"
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setMenuOpen(false)}
+            />
+            {/* panel */}
+            <aside className="absolute left-0 top-0 h-full w-[86%] max-w-sm border-r border-white/10 bg-black/90 p-5 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <div className="text-xs tracking-[0.3em] text-white/60">MENU</div>
+                <button
+                  className="rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <div className="text-xs tracking-[0.25em] text-white/60">
+                  CATEGORIES
+                </div>
+                <div className="mt-3 grid gap-2">
+                  {categories.map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={() => {
+                        setCategory(c.key);
+                        setMenuOpen(false);
+                        document
+                          .getElementById("product")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition ${
+                        category === c.key
+                          ? "border-white/30 bg-white/10 text-white"
+                          : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                      }`}
+                    >
+                      <span>{c.label}</span>
+                      <span className="text-white/40">→</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {/* ====== Hero ====== */}
+        <section className="relative">
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
+            <div>
+              <div className="flex flex-wrap gap-2">
+                <Pill>Street × Elegance</Pill>
+                <Pill>Contradiction</Pill>
+                <Pill>First Drop</Pill>
+              </div>
+
+              <h1 className="mt-6 text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
+                RUDE <span className="text-white/60">IS</span> BEAUTIFUL.
+              </h1>
+
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70">
+                「不良っぽいけど美しく」。相反する要素を1つに束ね、視線を奪う。
+                RUDESALUDは、矛盾を“個性”として成立させるブランド。
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="#product"
+                  className="rounded-xl bg-white px-5 py-3 text-center text-sm font-semibold text-black hover:bg-white/90"
+                >
+                  Explore Product
+                </a>
+                <a
+                  href="#concept"
+                  className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-center text-sm font-semibold text-white/90 hover:bg-white/10"
+                >
+                  Read Concept
+                </a>
+              </div>
+
+              <p className="mt-6 text-xs tracking-[0.2em] text-white/50">
+                {TAGLINE}
+              </p>
+            </div>
+
+            {/* right visual */}
+            <div className="relative">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                    <div className="text-xs tracking-[0.25em] text-white/60">
+                      GOAL
+                    </div>
+                    <div className="mt-2 text-lg font-semibold">
+                      High brand → Outlet store
+                    </div>
+                    <div className="mt-2 text-sm text-white/70">
+                      未来は“店舗で体験できる世界観”へ。
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-white/10 bg-black/40 p-4">
+                    <div className="text-xs tracking-[0.25em] text-white/60">
+                      DROP
+                    </div>
+                    <div className="mt-2 text-lg font-semibold">M / L only</div>
+                    <div className="mt-2 text-sm text-white/70">
+                      {product.sizeRatio}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs tracking-[0.25em] text-white/60">
+                        MATERIAL
+                      </div>
+                      <div className="mt-2 text-base font-semibold">
+                        {product.material}
+                      </div>
+                    </div>
+                    <div className="text-sm text-white/70">Stretch / Comfort</div>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-xl border border-white/10 bg-black/40 p-4">
+                  <div className="text-xs tracking-[0.25em] text-white/60">
+                    NOTE
+                  </div>
+                  <div className="mt-2 text-sm text-white/70">
+                    左上の≡からカテゴリを選べます。今はT-Shirtのみ表示、他はComing Soon。
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 以降（Concept/Product/Story/Contact/Footer）はあなたの既存コードのままでOK */}
+      </main>
+    </>
+  );
+}
+
 
       {/* ====== Concept ====== */}
       <section id="concept" className="border-t border-white/10">
