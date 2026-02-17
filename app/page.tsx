@@ -45,7 +45,6 @@ export default function Page() {
 
           {/* RIGHT NAV */}
           <nav className="hidden md:flex gap-8 text-sm tracking-wide">
-            {/* href="#" を Link にすると環境によっては怒られるので a にしています */}
             <a href="#" className="hover:opacity-70">STORE</a>
             <a href="#" className="hover:opacity-70">CLIENT SERVICE</a>
             <Link href="/legal" className="hover:opacity-70">LEGAL</Link>
@@ -115,6 +114,11 @@ export default function Page() {
           <p className="mt-6 text-sm tracking-[0.4em] text-black/50">
             RUDE BUT BEAUTIFUL
           </p>
+
+          {/* ✅ ここに入れる（確認用） */}
+          <div className="mt-4 text-xs text-black/40">
+            DEPLOY TEST: 2026-02-16 15:xx
+          </div>
         </div>
       </section>
 
@@ -122,7 +126,7 @@ export default function Page() {
       <section className="max-w-7xl mx-auto px-8 py-24 grid md:grid-cols-2 gap-16">
         {/* 画像を置くならここ：public/products/tee-front.jpg など */}
         <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-          {/* 画像入れたらコメント外す */}
+          {/* ✅ 画像入れたらコメント外す */}
           {/* <Image src="/products/tee-front.jpg" alt="Tee front" fill className="object-contain" /> */}
         </div>
 
@@ -155,4 +159,3 @@ export default function Page() {
     </main>
   );
 }
-<div className="mt-4 text-xs text-black/40">DEPLOY TEST: 2026-02-16 15:xx</div>
