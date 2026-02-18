@@ -9,16 +9,36 @@ type Panel = {
   slug: string;
   title: string;
   subtitle: string;
-  image?: string;
+  image?: string; // /categories/xxx.jpg
 };
 
 export default function StackPanels() {
   const panels: Panel[] = useMemo(
     () => [
-      { slug: "tshirt", title: "Tシャツ", subtitle: "さらに見る", image: "/categories/tshirt.jpg" },
-      { slug: "bag", title: "バッグ", subtitle: "さらに見る", image: "/categories/bag.jpg" },
-      { slug: "jacket", title: "ジャケット", subtitle: "さらに見る", image: "/categories/jacket.jpg" },
-      { slug: "accessory", title: "アクセサリー", subtitle: "さらに見る", image: "/categories/accessory.jpg" },
+      {
+        slug: "tshirt",
+        title: "Tシャツ",
+        subtitle: "さらに見る",
+        image: "/categories/tshirt.jpg",
+      },
+      {
+        slug: "bag",
+        title: "バッグ",
+        subtitle: "さらに見る",
+        image: "/categories/bag.jpg",
+      },
+      {
+        slug: "jacket",
+        title: "ジャケット",
+        subtitle: "さらに見る",
+        image: "/categories/jacket.jpg",
+      },
+      {
+        slug: "accessory",
+        title: "アクセサリー",
+        subtitle: "さらに見る",
+        image: "/categories/accessory.jpg",
+      },
     ],
     []
   );
@@ -36,7 +56,7 @@ export default function StackPanels() {
         const idx = Number((visible.target as HTMLElement).dataset.index ?? "0");
         setActive(idx);
       },
-      { threshold: [0.35, 0.5, 0.65] }
+      { root: null, threshold: [0.35, 0.5, 0.65] }
     );
 
     refs.current.forEach((el) => el && obs.observe(el));
@@ -47,6 +67,9 @@ export default function StackPanels() {
     <div className="bg-white text-black">
       <div className="relative">
         {panels.map((p, i) => {
+          const isActive = i === active;
+
+          // 前のパネルは少し奥に（ページめくりっぽさ）
           const scale = i < active ? "scale-[0.985]" : "scale-100";
           const shadow =
             i === active ? "shadow-[0_10px_40px_rgba(0,0,0,0.12)]" : "shadow-none";
@@ -58,35 +81,39 @@ export default function StackPanels() {
                 refs.current[i] = el;
               }}
               data-index={i}
-              className="sticky top-[80px] h-[calc(100vh-80px)] bg-white"
+              className="sticky top-[72px] md:top-[80px] h-[calc(100vh-72px)] md:h-[calc(100vh-80px)] bg-white"
               style={{ zIndex: 10 + i }}
             >
-              <div className={`h-full w-full border-b border-black/10 transition-transform duration-500 ease-out ${scale} ${shadow}`}>
+              <div
+                className={`h-full w-full border-b border-black/10 transition-transform duration-500 ease-out ${scale} ${shadow}`}
+              >
                 <div className="mx-auto flex h-full max-w-6xl flex-col items-center justify-center px-5">
                   <div className="w-full max-w-[720px]">
                     <div className="relative mx-auto aspect-[4/5] w-full bg-black/5 overflow-hidden">
-                      {!p.image && (
-                        <div className="absolute inset-0 flex items-center justify-center text-xs tracking-[0.35em] text-black/40">
-                          {p.slug.toUpperCase()}
-                        </div>
-                      )}
-                      {p.image && (
+                      {/* 画像 */}
+                      {p.image ? (
                         <Image
                           src={p.image}
                           alt={p.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           sizes="(max-width: 768px) 92vw, 720px"
                           priority={i === 0}
                         />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-xs tracking-[0.35em] text-black/40">
+                          {p.slug.toUpperCase()}
+                        </div>
                       )}
                     </div>
 
                     <div className="mt-6 text-center">
                       <div className="text-base font-medium">{p.title}</div>
+
+                      {/* ✅ ボタンっぽくして押しやすく */}
                       <Link
                         href={`/category/${p.slug}`}
-                        className="mt-2 inline-flex items-center justify-center text-sm text-black/70 hover:text-black underline underline-offset-4"
+                        className="mt-3 inline-flex items-center justify-center border border-black px-6 py-3 hover:bg-black hover:text-white transition text-sm"
                       >
                         {p.subtitle}
                       </Link>
@@ -94,7 +121,7 @@ export default function StackPanels() {
                   </div>
 
                   <div className="mt-10 text-xs tracking-[0.25em] text-black/30">
-                    {i === active ? "SCROLL" : ""}
+                    {isActive ? "SCROLL" : ""}
                   </div>
                 </div>
               </div>
@@ -102,7 +129,7 @@ export default function StackPanels() {
           );
         })}
 
-        {/* 最後のパネル用の余白 */}
+        {/* 最後の余白 */}
         <div className="h-[120vh]" />
       </div>
     </div>

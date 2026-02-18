@@ -8,8 +8,7 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-white text-black">
       <Header />
-
-      {/* Headerの高さ分の余白（好みで調整） */}
+      {/* Headerがfixedなので、下のコンテンツを少し下げる */}
       <div className="pt-[72px] md:pt-[80px]">
         <StackPanels />
       </div>

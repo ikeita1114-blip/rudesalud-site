@@ -1,33 +1,48 @@
+// app/components/Header.tsx
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const BRAND = "RUDESALUD";
 
 type DesktopMenu = "women" | "men" | "collection" | null;
 
+type Category = {
+  slug: string;
+  label: string;
+};
+
 export default function Header() {
+  // ===== Desktop mega menu =====
   const [activeMenu, setActiveMenu] = useState<DesktopMenu>(null);
 
   // ===== Mobile drawer =====
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // ===== Categories (mobile menu items) =====
-  const categories = [
-    { slug: "tshirt", label: "Tシャツ" },
-    { slug: "bag", label: "バッグ" },
-    { slug: "jacket", label: "ジャケット" },
-    { slug: "accessory", label: "アクセサリー" },
-  ];
+  const categories: Category[] = useMemo(
+    () => [
+      { slug: "tshirt", label: "Tシャツ" },
+      { slug: "bag", label: "バッグ" },
+      { slug: "jacket", label: "ジャケット" },
+      { slug: "accessory", label: "アクセサリー" },
+    ],
+    []
+  );
+
+  // モバイルメニュー開いてる時は背景スクロール止める
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
 
   return (
-    <header
-      className="fixed top-0 w-full bg-white border-b border-black/10 z-50"
-      // ✅ PC: ヘッダー領域から出た時だけ閉じる（これで消えなくなる）
-      onMouseLeave={() => setActiveMenu(null)}
-    >
-      <div className="max-w-7xl mx-auto px-5 md:px-8 py-4 md:py-5 flex items-center justify-between">
+    <header className="fixed top-0 w-full bg-white/95 backdrop-blur border-b border-black/10 z-50">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-5 flex items-center justify-between">
         {/* ===== Left: Mobile hamburger / Desktop nav ===== */}
         <div className="flex items-center gap-3">
           {/* Mobile hamburger */}
@@ -65,65 +80,88 @@ export default function Header() {
           </nav>
         </div>
 
-        {/* ===== Logo ===== */}
+        {/* ===== Center: Logo ===== */}
         <Link href="/" className="text-xl md:text-2xl font-serif tracking-[0.25em]">
           {BRAND}
         </Link>
 
         {/* ===== Right nav (desktop) ===== */}
         <nav className="hidden md:flex gap-8 text-sm tracking-wide">
-          <a href="#" className="hover:opacity-70">STORE</a>
-          <a href="#" className="hover:opacity-70">CLIENT SERVICE</a>
-          <Link href="/legal" className="hover:opacity-70">LEGAL</Link>
+          <a href="#" className="hover:opacity-70">
+            STORE
+          </a>
+          <a href="#" className="hover:opacity-70">
+            CLIENT SERVICE
+          </a>
+          <Link href="/legal" className="hover:opacity-70">
+            LEGAL
+          </Link>
         </nav>
 
-        {/* mobile spacing */}
+        {/* mobile right spacer */}
         <div className="md:hidden w-10" />
       </div>
 
       {/* ================= DESKTOP MEGA MENU ================= */}
       {activeMenu && (
         <div
-          className="absolute left-0 w-full bg-white border-t border-black/10 shadow-md"
-          // ✅ メニュー上に乗ってる間は開き続ける
+          // メニュー上にマウスがある限り閉じない
           onMouseEnter={() => setActiveMenu(activeMenu)}
+          onMouseLeave={() => setActiveMenu(null)}
+          className="hidden md:block absolute left-0 w-full bg-white border-t border-black/10 shadow-md"
         >
-          <div className="max-w-7xl mx-auto px-12 py-12 grid grid-cols-4 gap-16 text-sm">
+          <div className="max-w-7xl mx-auto px-12 py-10 grid grid-cols-4 gap-16 text-sm">
             <div>
               <h3 className="mb-4 font-semibold">SHOP</h3>
               <ul className="space-y-3 text-black/70">
-                <li><Link className="hover:text-black" href="/category/tshirt">Tシャツ</Link></li>
-                <li><Link className="hover:text-black" href="/category/bag">バッグ</Link></li>
-                <li><Link className="hover:text-black" href="/category/jacket">ジャケット</Link></li>
-                <li><Link className="hover:text-black" href="/category/accessory">アクセサリー</Link></li>
+                <li>
+                  <Link className="hover:text-black" href="/category/tshirt">
+                    Tシャツ
+                  </Link>
+                </li>
+                <li>
+                  <Link className="hover:text-black" href="/category/bag">
+                    バッグ
+                  </Link>
+                </li>
+                <li>
+                  <Link className="hover:text-black" href="/category/jacket">
+                    ジャケット
+                  </Link>
+                </li>
+                <li>
+                  <Link className="hover:text-black" href="/category/accessory">
+                    アクセサリー
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
               <h3 className="mb-4 font-semibold">FEATURED</h3>
               <ul className="space-y-3 text-black/70">
-                <li><a className="hover:text-black" href="#">Spring 2026</a></li>
-                <li><a className="hover:text-black" href="#">Limited Drop</a></li>
-                <li><a className="hover:text-black" href="#">Runway</a></li>
-                <li><a className="hover:text-black" href="#">Lookbook</a></li>
+                <li>Spring 2026</li>
+                <li>Limited Drop</li>
+                <li>Runway</li>
+                <li>Lookbook</li>
               </ul>
             </div>
 
             <div>
               <h3 className="mb-4 font-semibold">ABOUT</h3>
               <ul className="space-y-3 text-black/70">
-                <li><a className="hover:text-black" href="#">Brand Story</a></li>
-                <li><a className="hover:text-black" href="#">Philosophy</a></li>
-                <li><a className="hover:text-black" href="#">Press</a></li>
+                <li>Brand Story</li>
+                <li>Philosophy</li>
+                <li>Press</li>
               </ul>
             </div>
 
             <div>
               <h3 className="mb-4 font-semibold">SUPPORT</h3>
               <ul className="space-y-3 text-black/70">
-                <li><a className="hover:text-black" href="#">Contact</a></li>
-                <li><a className="hover:text-black" href="#">Shipping</a></li>
-                <li><a className="hover:text-black" href="#">Returns</a></li>
+                <li>Contact</li>
+                <li>Shipping</li>
+                <li>Returns</li>
               </ul>
             </div>
           </div>
@@ -136,47 +174,59 @@ export default function Header() {
           {/* overlay */}
           <button
             className="absolute inset-0 bg-black/30"
-            aria-label="Close menu overlay"
+            aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          {/* panel */}
+          {/* drawer */}
           <div className="absolute left-0 top-0 h-full w-[84%] max-w-[360px] bg-white shadow-xl border-r border-black/10">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
-              <div className="font-serif tracking-[0.25em]">{BRAND}</div>
+            <div className="flex items-center justify-between px-4 py-4 border-b border-black/10">
+              <div className="text-lg font-serif tracking-[0.25em]">{BRAND}</div>
               <button
                 className="h-10 w-10 border border-black/10 hover:bg-black hover:text-white transition"
-                aria-label="Close menu"
                 onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
               >
-                ×
+                ✕
               </button>
             </div>
 
-            <nav className="px-5 py-6">
-              <div className="text-xs tracking-[0.35em] text-black/50">CATEGORIES</div>
-              <ul className="mt-4 space-y-4 text-base">
-                {categories.map((c) => (
-                  <li key={c.slug}>
-                    {/* ✅ クリックで /category/[slug] に遷移 → あなたの「Tシャツ並ぶページ」が出る */}
-                    <Link
-                      href={`/category/${c.slug}`}
-                      className="block py-2 border-b border-black/10"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {c.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            <div className="px-4 py-4">
+              <div className="text-xs tracking-[0.35em] text-black/60 mb-3">
+                CATEGORIES
+              </div>
 
-              <div className="mt-8 space-y-3 text-sm text-black/70">
-                <a href="#" className="block">STORE</a>
-                <a href="#" className="block">CLIENT SERVICE</a>
-                <Link href="/legal" className="block" onClick={() => setMobileOpen(false)}>
+              <nav className="flex flex-col">
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/category/${c.slug}`}
+                    onClick={() => setMobileOpen(false)}
+                    className="py-3 border-b border-black/10 text-base hover:bg-black hover:text-white transition px-2"
+                  >
+                    {c.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-6 text-xs tracking-[0.35em] text-black/60">
+                SUPPORT
+              </div>
+              <div className="mt-3 flex flex-col">
+                <Link
+                  href="/legal"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-3 border-b border-black/10 hover:bg-black hover:text-white transition px-2"
+                >
                   LEGAL
                 </Link>
+                <a className="py-3 px-2 text-black/70" href="#">
+                  STORE（準備中）
+                </a>
+                <a className="py-3 px-2 text-black/70" href="#">
+                  CLIENT SERVICE（準備中）
+                </a>
               </div>
-            </nav>
+            </div>
           </div>
         </div>
       )}
