@@ -105,7 +105,7 @@ export default function StackPanels() {
                           src={p.image}
                           alt={p.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           sizes="(max-width: 768px) 92vw, 640px"
                           priority={i === 0}
                         />
