@@ -1,224 +1,185 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const BRAND = "RUDESALUD";
 
 type DesktopMenu = "women" | "men" | "collection" | null;
 
-const mobileCategories = [
-  { slug: "bag", label: "バッグ" },
-  { slug: "tshirt", label: "Tシャツ" },
-  { slug: "jacket", label: "ジャケット" },
-  { slug: "accessory", label: "アクセサリー" },
-];
-
 export default function Header() {
-  // ===== Desktop mega menu =====
   const [activeMenu, setActiveMenu] = useState<DesktopMenu>(null);
 
   // ===== Mobile drawer =====
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // mobile drawer open中は背景スクロールを止める
-  useEffect(() => {
-    if (!mobileOpen) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [mobileOpen]);
+  // ===== Categories (mobile menu items) =====
+  const categories = [
+    { slug: "tshirt", label: "Tシャツ" },
+    { slug: "bag", label: "バッグ" },
+    { slug: "jacket", label: "ジャケット" },
+    { slug: "accessory", label: "アクセサリー" },
+  ];
 
   return (
-    <>
-      <header className="fixed top-0 w-full bg-white border-b border-black/10 z-50">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 py-4 md:py-5 flex items-center justify-between">
-          {/* ================= LEFT ================= */}
-          <div className="flex items-center gap-3">
-            {/* Mobile: hamburger */}
-            <button
-              className="md:hidden inline-flex h-10 w-10 items-center justify-center border border-black/10 hover:bg-black hover:text-white transition"
-              aria-label="Open menu"
-              onClick={() => setMobileOpen(true)}
-            >
-              <span className="text-xl leading-none">≡</span>
-            </button>
-
-            {/* Desktop: top nav */}
-            <nav className="hidden md:flex gap-8 text-sm tracking-wide">
-              <button
-                onMouseEnter={() => setActiveMenu("women")}
-                onMouseLeave={() => setActiveMenu(null)}
-                className="hover:opacity-70"
-              >
-                WOMEN
-              </button>
-              <button
-                onMouseEnter={() => setActiveMenu("men")}
-                onMouseLeave={() => setActiveMenu(null)}
-                className="hover:opacity-70"
-              >
-                MEN
-              </button>
-              <button
-                onMouseEnter={() => setActiveMenu("collection")}
-                onMouseLeave={() => setActiveMenu(null)}
-                className="hover:opacity-70"
-              >
-                COLLECTION
-              </button>
-            </nav>
-          </div>
-
-          {/* ================= CENTER LOGO ================= */}
-          <Link
-            href="/"
-            className="text-xl md:text-2xl font-serif tracking-[0.25em] hover:opacity-80"
+    <header
+      className="fixed top-0 w-full bg-white border-b border-black/10 z-50"
+      // ✅ PC: ヘッダー領域から出た時だけ閉じる（これで消えなくなる）
+      onMouseLeave={() => setActiveMenu(null)}
+    >
+      <div className="max-w-7xl mx-auto px-5 md:px-8 py-4 md:py-5 flex items-center justify-between">
+        {/* ===== Left: Mobile hamburger / Desktop nav ===== */}
+        <div className="flex items-center gap-3">
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden inline-flex h-10 w-10 items-center justify-center border border-black/10 hover:bg-black hover:text-white transition"
+            aria-label="Open menu"
+            onClick={() => setMobileOpen(true)}
           >
-            {BRAND}
-          </Link>
+            <span className="text-xl leading-none">≡</span>
+          </button>
 
-          {/* ================= RIGHT ================= */}
+          {/* Desktop left nav */}
           <nav className="hidden md:flex gap-8 text-sm tracking-wide">
-            <a href="#" className="hover:opacity-70">
-              STORE
-            </a>
-            <a href="#" className="hover:opacity-70">
-              CLIENT SERVICE
-            </a>
-            <Link href="/legal" className="hover:opacity-70">
-              LEGAL
-            </Link>
+            <button
+              onMouseEnter={() => setActiveMenu("women")}
+              className="hover:opacity-70"
+              type="button"
+            >
+              WOMEN
+            </button>
+            <button
+              onMouseEnter={() => setActiveMenu("men")}
+              className="hover:opacity-70"
+              type="button"
+            >
+              MEN
+            </button>
+            <button
+              onMouseEnter={() => setActiveMenu("collection")}
+              className="hover:opacity-70"
+              type="button"
+            >
+              COLLECTION
+            </button>
           </nav>
-
-          {/* Mobile: right placeholder (balance) */}
-          <div className="md:hidden w-10" />
         </div>
 
-        {/* ================= DESKTOP MEGA MENU ================= */}
-        {activeMenu && (
-          <div
-            className="hidden md:block absolute left-0 w-full bg-white border-t border-black/10 shadow-md"
-            onMouseEnter={() => setActiveMenu(activeMenu)}
-            onMouseLeave={() => setActiveMenu(null)}
-          >
-            <div className="max-w-7xl mx-auto px-12 py-12 grid grid-cols-4 gap-16 text-sm">
-              <div>
-                <h3 className="mb-4 font-semibold">SHOP</h3>
-                <ul className="space-y-3 text-black/70">
-                  <li>New Arrival</li>
-                  <li>Ready to Wear</li>
-                  <li>Bags</li>
-                  <li>Shoes</li>
-                  <li>Accessories</li>
-                </ul>
-              </div>
+        {/* ===== Logo ===== */}
+        <Link href="/" className="text-xl md:text-2xl font-serif tracking-[0.25em]">
+          {BRAND}
+        </Link>
 
-              <div>
-                <h3 className="mb-4 font-semibold">FEATURED</h3>
-                <ul className="space-y-3 text-black/70">
-                  <li>Spring 2026</li>
-                  <li>Limited Drop</li>
-                  <li>Runway</li>
-                  <li>Lookbook</li>
-                </ul>
-              </div>
+        {/* ===== Right nav (desktop) ===== */}
+        <nav className="hidden md:flex gap-8 text-sm tracking-wide">
+          <a href="#" className="hover:opacity-70">STORE</a>
+          <a href="#" className="hover:opacity-70">CLIENT SERVICE</a>
+          <Link href="/legal" className="hover:opacity-70">LEGAL</Link>
+        </nav>
 
-              <div>
-                <h3 className="mb-4 font-semibold">ABOUT</h3>
-                <ul className="space-y-3 text-black/70">
-                  <li>Brand Story</li>
-                  <li>Philosophy</li>
-                  <li>Press</li>
-                </ul>
-              </div>
+        {/* mobile spacing */}
+        <div className="md:hidden w-10" />
+      </div>
 
-              <div>
-                <h3 className="mb-4 font-semibold">SUPPORT</h3>
-                <ul className="space-y-3 text-black/70">
-                  <li>Contact</li>
-                  <li>Shipping</li>
-                  <li>Returns</li>
-                </ul>
-              </div>
+      {/* ================= DESKTOP MEGA MENU ================= */}
+      {activeMenu && (
+        <div
+          className="absolute left-0 w-full bg-white border-t border-black/10 shadow-md"
+          // ✅ メニュー上に乗ってる間は開き続ける
+          onMouseEnter={() => setActiveMenu(activeMenu)}
+        >
+          <div className="max-w-7xl mx-auto px-12 py-12 grid grid-cols-4 gap-16 text-sm">
+            <div>
+              <h3 className="mb-4 font-semibold">SHOP</h3>
+              <ul className="space-y-3 text-black/70">
+                <li><Link className="hover:text-black" href="/category/tshirt">Tシャツ</Link></li>
+                <li><Link className="hover:text-black" href="/category/bag">バッグ</Link></li>
+                <li><Link className="hover:text-black" href="/category/jacket">ジャケット</Link></li>
+                <li><Link className="hover:text-black" href="/category/accessory">アクセサリー</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="mb-4 font-semibold">FEATURED</h3>
+              <ul className="space-y-3 text-black/70">
+                <li><a className="hover:text-black" href="#">Spring 2026</a></li>
+                <li><a className="hover:text-black" href="#">Limited Drop</a></li>
+                <li><a className="hover:text-black" href="#">Runway</a></li>
+                <li><a className="hover:text-black" href="#">Lookbook</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="mb-4 font-semibold">ABOUT</h3>
+              <ul className="space-y-3 text-black/70">
+                <li><a className="hover:text-black" href="#">Brand Story</a></li>
+                <li><a className="hover:text-black" href="#">Philosophy</a></li>
+                <li><a className="hover:text-black" href="#">Press</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="mb-4 font-semibold">SUPPORT</h3>
+              <ul className="space-y-3 text-black/70">
+                <li><a className="hover:text-black" href="#">Contact</a></li>
+                <li><a className="hover:text-black" href="#">Shipping</a></li>
+                <li><a className="hover:text-black" href="#">Returns</a></li>
+              </ul>
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       {/* ================= MOBILE DRAWER ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] md:hidden">
-          {/* backdrop */}
+          {/* overlay */}
           <button
-            aria-label="Close menu"
-            className="absolute inset-0 bg-black/60"
+            className="absolute inset-0 bg-black/30"
+            aria-label="Close menu overlay"
             onClick={() => setMobileOpen(false)}
           />
-
           {/* panel */}
-          <aside className="absolute left-0 top-0 h-full w-[86%] max-w-sm bg-white border-r border-black/10">
-            <div className="px-5 py-5 border-b border-black/10 flex items-center justify-between">
-              <div className="text-lg font-serif tracking-[0.22em]">{BRAND}</div>
+          <div className="absolute left-0 top-0 h-full w-[84%] max-w-[360px] bg-white shadow-xl border-r border-black/10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+              <div className="font-serif tracking-[0.25em]">{BRAND}</div>
               <button
-                className="h-10 px-4 border border-black/10 hover:bg-black hover:text-white transition"
+                className="h-10 w-10 border border-black/10 hover:bg-black hover:text-white transition"
+                aria-label="Close menu"
                 onClick={() => setMobileOpen(false)}
               >
-                Close
+                ×
               </button>
             </div>
 
-            <div className="px-5 py-6">
-              <div className="text-xs tracking-[0.35em] text-black/50">
-                CATEGORIES
-              </div>
-
-              <div className="mt-4 grid gap-2">
-                {mobileCategories.map((c) => (
-                  <Link
-                    key={c.slug}
-                    href={`/category/${c.slug}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between border border-black/10 px-4 py-4 hover:bg-black hover:text-white transition"
-                  >
-                    <span className="text-sm tracking-wide">{c.label}</span>
-                    <span className="text-black/40 group-hover:text-white">→</span>
-                  </Link>
+            <nav className="px-5 py-6">
+              <div className="text-xs tracking-[0.35em] text-black/50">CATEGORIES</div>
+              <ul className="mt-4 space-y-4 text-base">
+                {categories.map((c) => (
+                  <li key={c.slug}>
+                    {/* ✅ クリックで /category/[slug] に遷移 → あなたの「Tシャツ並ぶページ」が出る */}
+                    <Link
+                      href={`/category/${c.slug}`}
+                      className="block py-2 border-b border-black/10"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {c.label}
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ul>
 
-              <div className="mt-8 border-t border-black/10 pt-6">
-                <div className="text-xs tracking-[0.35em] text-black/50">
-                  LINKS
-                </div>
-                <div className="mt-3 grid gap-2">
-                  <Link
-                    href="/legal"
-                    onClick={() => setMobileOpen(false)}
-                    className="border border-black/10 px-4 py-4 hover:bg-black hover:text-white transition"
-                  >
-                    LEGAL
-                  </Link>
-                  <a
-                    href="#"
-                    className="border border-black/10 px-4 py-4 hover:bg-black hover:text-white transition"
-                  >
-                    STORE
-                  </a>
-                  <a
-                    href="#"
-                    className="border border-black/10 px-4 py-4 hover:bg-black hover:text-white transition"
-                  >
-                    CLIENT SERVICE
-                  </a>
-                </div>
+              <div className="mt-8 space-y-3 text-sm text-black/70">
+                <a href="#" className="block">STORE</a>
+                <a href="#" className="block">CLIENT SERVICE</a>
+                <Link href="/legal" className="block" onClick={() => setMobileOpen(false)}>
+                  LEGAL
+                </Link>
               </div>
-            </div>
-          </aside>
+            </nav>
+          </div>
         </div>
       )}
-    </>
+    </header>
   );
 }
