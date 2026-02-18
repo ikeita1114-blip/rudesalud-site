@@ -15,8 +15,8 @@ type Panel = {
 export default function StackPanels() {
   const panels: Panel[] = useMemo(
     () => [
-      { slug: "bag", title: "バッグ", subtitle: "さらに見る", image: "/categories/bag.jpg" },
       { slug: "tshirt", title: "Tシャツ", subtitle: "さらに見る", image: "/categories/tshirt.jpg" },
+      { slug: "bag", title: "バッグ", subtitle: "さらに見る", image: "/categories/bag.jpg" },
       { slug: "jacket", title: "ジャケット", subtitle: "さらに見る", image: "/categories/jacket.jpg" },
       { slug: "accessory", title: "アクセサリー", subtitle: "さらに見る", image: "/categories/accessory.jpg" },
     ],
