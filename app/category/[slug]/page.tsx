@@ -9,21 +9,15 @@ type Props = { params: { slug: string } };
 type Product = {
   name: string;
   price: string;
-  images: string[]; // public/products/...
+  images: string[];
 };
 
 const tshirtProducts: Product[] = [
   {
     name: "Checker Heart Tee",
     price: "¥12,800",
-    images: [ "/products/tee-back.jpg"],
+    images: ["/products/tee-front.jpg", "/products/tee-back.jpg"],
   },
-  // ✅ 追加例
-  // {
-  //   name: "Logo Tee",
-  //   price: "¥9,800",
-  //   images: ["/products/logo-front.jpg", "/products/logo-back.jpg"],
-  // },
 ];
 
 export default function CategoryPage({ params }: Props) {
@@ -81,7 +75,6 @@ export default function CategoryPage({ params }: Props) {
                   <button
                     className="mt-4 w-full border border-black px-6 py-3 hover:bg-black hover:text-white transition"
                     disabled
-                    title="決済は後でStripe導入"
                   >
                     COMING SOON (SHOP)
                   </button>
