@@ -11,42 +11,21 @@ type Panel = {
   image?: string; // /categories/xxx.jpg
 };
 
-function existsImage(path: string) {
-  // 画像が無い場合でも壊れないようにするためのダミー
-  // publicに無ければ Next/Image は 404 になるが表示は崩れない（プレースホルダも併用）
-  return path;
-}
-
 export default function StackPanels() {
+  const BRAND = "RUDESALUD";
+
   const panels: Panel[] = useMemo(
     () => [
-      {
-        slug: "bag",
-        title: "バッグ",
-        subtitle: "さらに見る",
-        image: "/categories/bag.jpg",
-      },
-      {
-        slug: "tshirt",
-        title: "Tシャツ",
-        subtitle: "さらに見る",
-        image: "/categories/tshirt.jpg",
-      },
-      {
-        slug: "jacket",
-        title: "ジャケット",
-        subtitle: "さらに見る",
-        image: "/categories/jacket.jpg",
-      },
-      {
-        slug: "accessory",
-        title: "アクセサリー",
-        subtitle: "さらに見る",
-        image: "/categories/accessory.jpg",
-      },
+      { slug: "tshirt", title: "Tシャツ", subtitle: "さらに見る", image: "/categories/tshirt.jpg" },
+      { slug: "bag", title: "バッグ", subtitle: "さらに見る", image: "/categories/bag.jpg" },
+      { slug: "jacket", title: "ジャケット", subtitle: "さらに見る", image: "/categories/jacket.jpg" },
+      { slug: "accessory", title: "アクセサリー", subtitle: "さらに見る", image: "/categories/accessory.jpg" },
     ],
     []
   );
+
+  // ヘッダー高さ（stickyのtopに合わせる）
+  const HEADER_H = 80;
 
   const refs = useRef<(HTMLElement | null)[]>([]);
   const [active, setActive] = useState(0);
@@ -54,15 +33,15 @@ export default function StackPanels() {
   useEffect(() => {
     const obs = new IntersectionObserver(
       (entries) => {
-        // 画面中央付近にいるセクションを active にする
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0];
+
         if (!visible) return;
         const idx = Number((visible.target as HTMLElement).dataset.index ?? "0");
         setActive(idx);
       },
-      { root: null, threshold: [0.35, 0.5, 0.65] }
+      { threshold: [0.35, 0.5, 0.65] }
     );
 
     refs.current.forEach((el) => el && obs.observe(el));
@@ -70,42 +49,60 @@ export default function StackPanels() {
   }, []);
 
   return (
-    <div className="bg-white text-black">
-      {/* 4枚分スクロールできる高さを確保 */}
-      <div className="relative">
-        {panels.map((p, i) => {
-          const isActive = i === active;
+    <main className="min-h-screen bg-white text-black">
+      {/* ===== 固定ヘッダー（サンローラン風）===== */}
+      <header className="fixed top-0 left-0 right-0 z-[1000] bg-white border-b border-black/10">
+        <div className="max-w-7xl mx-auto px-6 h-[80px] flex items-center justify-between">
+          {/* Left */}
+          <div className="flex items-center gap-4 text-sm tracking-wide">
+            <span className="hidden md:inline text-black/70">MENU</span>
+          </div>
 
-          // “ページめくり感”＝前のパネルは少しだけ奥に引っ込む
-          const scale = i < active ? "scale-[0.985]" : "scale-100";
-          const shadow = i === active ? "shadow-[0_10px_40px_rgba(0,0,0,0.12)]" : "shadow-none";
+          {/* Center Logo */}
+          <div className="text-2xl font-serif tracking-[0.25em]">{BRAND}</div>
+
+          {/* Right */}
+          <nav className="flex items-center gap-6 text-sm tracking-wide">
+            <Link href="/legal" className="hover:opacity-70">LEGAL</Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* ===== スタックパネル（上にかぶさる）===== */}
+      <div className="relative" style={{ paddingTop: HEADER_H }}>
+        {panels.map((p, i) => {
+          // 前のパネルほど奥に引っ込む（めくり感）
+          const past = i < active;
+          const scale = past ? "scale-[0.985]" : "scale-100";
+          const shadow =
+            i === active ? "shadow-[0_12px_40px_rgba(0,0,0,0.14)]" : "shadow-none";
 
           return (
             <section
               key={p.slug}
-              ref={(el) => {
-                refs.current[i] = el;
-              }}
+              ref={(el) => { refs.current[i] = el; }}
               data-index={i}
-              className="sticky top-[72px] md:top-[80px] h-[calc(100vh-72px)] md:h-[calc(100vh-80px)] bg-white"
-              style={{ zIndex: 10 + i }}
+              className="sticky bg-white"
+              style={{
+                top: HEADER_H,
+                height: `calc(100vh - ${HEADER_H}px)`,
+                zIndex: 10 + i,
+              }}
             >
-              <div
-                className={`h-full w-full border-b border-black/10 transition-transform duration-500 ease-out ${scale} ${shadow}`}
-              >
+              <div className={`h-full w-full border-b border-black/10 transition-transform duration-500 ease-out ${scale} ${shadow}`}>
                 <div className="mx-auto flex h-full max-w-6xl flex-col items-center justify-center px-5">
                   {/* image box */}
                   <div className="w-full max-w-[640px]">
-                    <div className="relative mx-auto aspect-[4/5] w-full bg-black/5">
-                      {/* プレースホルダ（画像が無い場合でも雰囲気を保つ） */}
-                      <div className="absolute inset-0 flex items-center justify-center text-xs tracking-[0.35em] text-black/40">
+                    <div className="relative mx-auto aspect-[4/5] w-full bg-black/5 overflow-hidden">
+                      {/* 画像がない時の文字（保険） */}
+                      <div className="absolute inset-0 flex items-center justify-center text-xs tracking-[0.35em] text-black/35">
                         {p.slug.toUpperCase()}
                       </div>
 
-                      {/* 任意：public/categories に画像があれば表示 */}
+                      {/* public/categories に画像があれば表示 */}
                       {p.image && (
                         <Image
-                          src={existsImage(p.image)}
+                          src={p.image}
                           alt={p.title}
                           fill
                           className="object-cover"
@@ -126,9 +123,8 @@ export default function StackPanels() {
                     </div>
                   </div>
 
-                  {/* small hint */}
                   <div className="mt-10 text-xs tracking-[0.25em] text-black/30">
-                    {isActive ? "SCROLL" : ""}
+                    {i === active ? "SCROLL" : ""}
                   </div>
                 </div>
               </div>
@@ -136,9 +132,9 @@ export default function StackPanels() {
           );
         })}
 
-        {/* 下に余白（最後のパネルが見切れないように） */}
-        <div className="h-[120vh]" />
+        {/* 最後のパネルを“めくり切る”ための余白 */}
+        <div style={{ height: "120vh" }} />
       </div>
-    </div>
+    </main>
   );
 }
