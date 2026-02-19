@@ -105,7 +105,6 @@ export default function Header() {
       {/* ================= DESKTOP MEGA MENU ================= */}
       {activeMenu && (
         <div
-          // メニュー上にマウスがある限り閉じない
           onMouseEnter={() => setActiveMenu(activeMenu)}
           onMouseLeave={() => setActiveMenu(null)}
           className="hidden md:block absolute left-0 w-full bg-white border-t border-black/10 shadow-md"
@@ -168,66 +167,79 @@ export default function Header() {
         </div>
       )}
 
-      {/* ================= MOBILE DRAWER ================= */}
+      {/* ================= MOBILE DRAWER (3D浮きパネル版) ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] md:hidden">
-          {/* overlay */}
+          {/* 背景：暗く + ぼかしで写真と分離 */}
           <button
-            className="absolute inset-0 bg-black/30"
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          {/* drawer */}
-          <div className="absolute left-0 top-0 h-full w-[84%] max-w-[360px] bg-white shadow-xl border-r border-black/10">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-black/10">
-              <div className="text-lg font-serif tracking-[0.25em]">{BRAND}</div>
+
+          {/* パネル：浮いてる感じ（影/角丸/枠） */}
+          <aside className="absolute left-3 right-3 top-3 rounded-2xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.35)] ring-1 ring-black/10 overflow-hidden">
+            {/* ヘッダ */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
+              <div className="text-xs tracking-[0.35em] text-black/60">MENU</div>
               <button
-                className="h-10 w-10 border border-black/10 hover:bg-black hover:text-white transition"
                 onClick={() => setMobileOpen(false)}
+                className="inline-flex items-center justify-center rounded-xl border border-black/10 px-3 py-2 text-sm hover:bg-black hover:text-white transition"
                 aria-label="Close menu"
               >
-                ✕
+                Close
               </button>
             </div>
 
-            <div className="px-4 py-4">
-              <div className="text-xs tracking-[0.35em] text-black/60 mb-3">
+            <div className="px-5 py-5">
+              {/* ブランド */}
+              <div className="text-lg font-serif tracking-[0.25em]">{BRAND}</div>
+              <div className="mt-1 text-xs tracking-[0.35em] text-black/50">
                 CATEGORIES
               </div>
 
-              <nav className="flex flex-col">
+              {/* カテゴリ：小カードでさらに浮かせる */}
+              <div className="mt-4 grid gap-3">
                 {categories.map((c) => (
                   <Link
                     key={c.slug}
                     href={`/category/${c.slug}`}
                     onClick={() => setMobileOpen(false)}
-                    className="py-3 border-b border-black/10 text-base hover:bg-black hover:text-white transition px-2"
+                    className="flex items-center justify-between rounded-2xl border border-black/10 bg-white px-4 py-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] active:scale-[0.99] transition"
                   >
-                    {c.label}
+                    <span className="text-base font-medium">{c.label}</span>
+                    <span className="text-black/40">→</span>
                   </Link>
                 ))}
-              </nav>
+              </div>
 
-              <div className="mt-6 text-xs tracking-[0.35em] text-black/60">
+              {/* サポート */}
+              <div className="mt-6 text-xs tracking-[0.35em] text-black/50">
                 SUPPORT
               </div>
-              <div className="mt-3 flex flex-col">
+              <div className="mt-3 grid gap-2">
                 <Link
                   href="/legal"
                   onClick={() => setMobileOpen(false)}
-                  className="py-3 border-b border-black/10 hover:bg-black hover:text-white transition px-2"
+                  className="rounded-xl border border-black/10 px-4 py-3 text-sm hover:bg-black hover:text-white transition"
                 >
                   LEGAL
                 </Link>
-                <a className="py-3 px-2 text-black/70" href="#">
+                <a
+                  className="rounded-xl border border-black/10 px-4 py-3 text-sm text-black/70"
+                  href="#"
+                >
                   STORE（準備中）
                 </a>
-                <a className="py-3 px-2 text-black/70" href="#">
+                <a
+                  className="rounded-xl border border-black/10 px-4 py-3 text-sm text-black/70"
+                  href="#"
+                >
                   CLIENT SERVICE（準備中）
                 </a>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </header>
