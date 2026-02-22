@@ -1,158 +1,129 @@
+// app/category/[slug]/page.tsx
 "use client";
 
-// app/category/[slug]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const BRAND = "RUDESALUD";
 
+// ★ build反映確認用（画面に表示される）
+// デプロイが反映されていないと、この値が更新されないのでチェックしやすい
+const BUILD_ID = "2026-02-21-v1";
+
 type Props = { params: { slug: string } };
 
 type Product = {
-  slug: string;
+  id: string;
   name: string;
   price: string;
-  images: { src: string; alt?: string }[]; // front/backなど複数
-  note?: string;
-  available?: boolean;
+  images: { front: string; back: string };
+  description?: string;
 };
 
-const titleMap: Record<string, string> = {
-  bag: "バッグ",
-  tshirt: "Tシャツ",
-  jacket: "ジャケット",
-  accessory: "アクセサリー",
-};
-
-const productsByCategory: Record<string, Product[]> = {
-  tshirt: [
-    {
-      slug: "checker-heart-tee",
-      name: "Checker Heart Tee",
-      price: "¥12,800",
-      images: [
-        { src: "/products/tee-front.jpg", alt: "Checker Heart Tee front" },
-        { src: "/products/tee-back.jpg", alt: "Checker Heart Tee back" },
-      ],
-      note: "（税込）",
-      available: false,
+// ★ Tシャツ商品を増やしたい場合はここに追加していく
+const tshirtProducts: Product[] = [
+  {
+    id: "checker-heart-tee",
+    name: "Checker Heart Tee",
+    price: "¥12,800",
+    images: {
+      front: "/products/tshirt/checker-heart/front.jpg",
+      back: "/products/tshirt/checker-heart/back.jpg",
     },
-  ],
-  bag: [],
-  jacket: [],
-  accessory: [],
-};
+    description: "RUDE BUT BEAUTIFUL.",
+  },
+  // 例：追加したいとき
+  // {
+  //   id: "another-tee",
+  //   name: "Another Tee",
+  //   price: "¥13,800",
+  //   images: {
+  //     front: "/products/tshirt/another/front.jpg",
+  //     back: "/products/tshirt/another/back.jpg",
+  //   },
+  // },
+];
 
-function ImageSwitcher({
-  images,
-  productName,
-}: {
-  images: { src: string; alt?: string }[];
-  productName: string;
-}) {
-  const [idx, setIdx] = useState(0);
-  const count = images.length;
+function ProductCard({ p }: { p: Product }) {
+  const [side, setSide] = useState<"front" | "back">("front");
 
-  const canSwitch = count > 1;
-
-  const prev = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIdx((v) => (v - 1 + count) % count);
-  };
-
-  const next = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIdx((v) => (v + 1) % count);
-  };
-
-  const current = images[idx];
+  const currentSrc = side === "front" ? p.images.front : p.images.back;
 
   return (
-    <div className="relative w-full aspect-[4/5] bg-black/5 overflow-hidden">
-      <Image
-        key={current.src} // 画像切替の反映を確実に
-        src={current.src}
-        alt={current.alt ?? productName}
-        fill
-        className="object-contain"
-        sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-      />
+    <div className="border border-black/10 p-5">
+      {/* 画像（1つの場所で切り替え） */}
+      <div className="relative aspect-[3/4] bg-black/5 overflow-hidden">
+        <Image
+          src={currentSrc}
+          alt={`${p.name} ${side}`}
+          fill
+          className="object-contain"
+          sizes="(max-width: 768px) 90vw, 320px"
+          priority={false}
+        />
+      </div>
 
-      {/* 左右ボタン（画像が2枚以上の時だけ表示） */}
-      {canSwitch && (
-        <>
-          <button
-            onClick={prev}
-            aria-label="Previous image"
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/85 backdrop-blur border border-black/10 hover:bg-white transition flex items-center justify-center"
-          >
-            ←
-          </button>
+      {/* 切り替えボタン */}
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setSide("front")}
+          className={`flex-1 border px-4 py-2 text-sm transition ${
+            side === "front"
+              ? "bg-black text-white border-black"
+              : "border-black/30 hover:border-black"
+          }`}
+        >
+          FRONT
+        </button>
+        <button
+          type="button"
+          onClick={() => setSide("back")}
+          className={`flex-1 border px-4 py-2 text-sm transition ${
+            side === "back"
+              ? "bg-black text-white border-black"
+              : "border-black/30 hover:border-black"
+          }`}
+        >
+          BACK
+        </button>
+      </div>
 
-          <button
-            onClick={next}
-            aria-label="Next image"
-            className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-white/85 backdrop-blur border border-black/10 hover:bg-white transition flex items-center justify-center"
-          >
-            →
-          </button>
+      {/* 情報 */}
+      <div className="mt-5">
+        <div className="text-lg font-serif">{p.name}</div>
+        <div className="mt-1 text-black/70">{p.price}</div>
 
-          {/* 画像インジケータ（例: 1/2） */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs tracking-[0.2em] bg-white/85 backdrop-blur border border-black/10 rounded-full">
-            {idx + 1}/{count}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+        {p.description ? (
+          <p className="mt-3 text-sm text-black/60 leading-relaxed">{p.description}</p>
+        ) : null}
 
-function ProductGrid({ products }: { products: Product[] }) {
-  return (
-    <div className="mt-10">
-      <div className="grid gap-x-10 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((p) => (
-          <div key={p.slug} className="group">
-            {/* 1つの枠でfront/back切替 */}
-            <ImageSwitcher images={p.images} productName={p.name} />
-
-            <div className="mt-6 text-center">
-              <div className="text-sm md:text-base font-serif tracking-wide">
-                {p.name}
-              </div>
-
-              <div className="mt-2 text-sm text-black/80">
-                {p.price}
-                {p.note ? (
-                  <span className="ml-1 text-black/60">{p.note}</span>
-                ) : null}
-              </div>
-
-              <div className="mt-4">
-                <button
-                  className="px-6 py-2 border border-black/20 text-xs tracking-[0.25em] hover:border-black transition disabled:opacity-40 disabled:hover:border-black/20"
-                  disabled={!p.available}
-                >
-                  {p.available ? "VIEW" : "COMING SOON"}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+        <button
+          className="mt-5 w-full border border-black px-6 py-3 hover:bg-black hover:text-white transition"
+          disabled
+        >
+          COMING SOON (SHOP)
+        </button>
       </div>
     </div>
   );
 }
 
 export default function CategoryPage({ params }: Props) {
-  const slug = params.slug;
-  const title = titleMap[slug] ?? "Category";
+  // slug 正規化（空白・大文字対策）
+  const rawSlug = params.slug ?? "";
+  const slug = useMemo(() => rawSlug.toLowerCase().trim(), [rawSlug]);
 
-  const products = useMemo(() => productsByCategory[slug] ?? [], [slug]);
-  const hasProducts = products.length > 0;
+  const titleMap: Record<string, string> = {
+    bag: "バッグ",
+    tshirt: "Tシャツ",
+    jacket: "ジャケット",
+    accessory: "アクセサリー",
+  };
+
+  const title = titleMap[slug] ?? "Category";
+  const isTshirt = slug === "tshirt";
 
   return (
     <main className="min-h-screen bg-white text-black">
@@ -171,13 +142,20 @@ export default function CategoryPage({ params }: Props) {
       <section className="mx-auto max-w-7xl px-5 py-10">
         <h1 className="text-3xl md:text-4xl font-serif tracking-wide">{title}</h1>
 
-        {hasProducts ? (
-          <ProductGrid products={products} />
+        {/* ★ 反映確認用（本番で消したければこのブロックをコメントアウト） */}
+        <p className="mt-2 text-xs text-black/45">
+          debug: rawSlug={JSON.stringify(rawSlug)} / normalized={JSON.stringify(slug)} / build={BUILD_ID}
+        </p>
+
+        {isTshirt ? (
+          <div className="mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+            {tshirtProducts.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
         ) : (
           <div className="mt-10 border border-black/10 p-10 text-center">
-            <div className="text-xs tracking-[0.35em] text-black/60">
-              COMING SOON
-            </div>
+            <div className="text-xs tracking-[0.35em] text-black/60">COMING SOON</div>
             <div className="mt-4 text-2xl font-serif">{title}</div>
             <p className="mt-3 text-black/60">
               このカテゴリは現在準備中です。次のドロップをお待ちください。
