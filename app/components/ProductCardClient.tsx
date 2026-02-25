@@ -283,4 +283,3 @@ export default function ProductCardClient({ p }: { p: Product }) {
     </div>
   );
 }
-'@ | Set-Content -Encoding UTF8 "app\components\ProductCardClient.tsx"
