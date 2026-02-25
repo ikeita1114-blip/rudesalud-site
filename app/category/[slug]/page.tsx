@@ -1,6 +1,3 @@
-New-Item -ItemType Directory -Force "app\category\[slug]" | Out-Null
-
-@'
 // app/category/[slug]/page.tsx
 import Link from "next/link";
 import ProductCardClient, { type Product } from "@/app/components/ProductCardClient";
@@ -28,7 +25,8 @@ const PRODUCTS_BY_CATEGORY: Record<string, Product[]> = {
         { src: "/products/tee-front.jpg", alt: "Checker Heart Tee - Front" },
         { src: "/products/tee-back.jpg", alt: "Checker Heart Tee - Back" },
       ],
-      description: "反骨と上品さが同居する、RUDESALUDの象徴的グラフィック。荒さの中に、美しさを。",
+      description:
+        "反骨と上品さが同居する、RUDESALUDの象徴的グラフィック。荒さの中に、美しさを。",
       colors: ["Black", "Red", "Light Blue", "Sport Grey", "White"],
       sizes: ["S", "M", "L", "XL"],
       sizeChart: [
@@ -89,4 +87,3 @@ export default function CategoryPage({ params }: Props) {
     </main>
   );
 }
-'@ | Set-Content -Encoding UTF8 "app\category\[slug]\page.tsx"

@@ -1,6 +1,3 @@
-New-Item -ItemType Directory -Force "app\components" | Out-Null
-
-@'
 "use client";
 
 import Image from "next/image";
