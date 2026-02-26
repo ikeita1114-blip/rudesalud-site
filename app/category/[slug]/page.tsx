@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 
 const BRAND = "RUDESALUD";
 
-type Props = { params: { slug: string } };
+// Next.js 16系で params が Promise になる場合があるため Promise で受ける
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
 const TITLE_MAP: Record<string, string> = {
   bag: "バッグ",
@@ -40,8 +43,11 @@ const PRODUCTS_BY_CATEGORY: Record<string, Product[]> = {
   ],
 };
 
-export default function CategoryPage({ params }: Props) {
-  const slug = (params?.slug ?? "").toLowerCase().trim();
+export default async function CategoryPage({ params }: Props) {
+  // ✅ Promise を unwrap
+  const { slug: rawSlug } = await params;
+  const slug = (rawSlug ?? "").toLowerCase().trim();
+
   const title = TITLE_MAP[slug] ?? "Category";
   const products = PRODUCTS_BY_CATEGORY[slug] ?? [];
 
