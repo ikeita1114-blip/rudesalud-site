@@ -1,6 +1,7 @@
 // app/category/[slug]/page.tsx
 import Link from "next/link";
 import ProductCardClient, { type Product } from "@/app/components/ProductCardClient";
+import CartButtonClient from "@/app/components/CartButtonClient";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,6 @@ const PRODUCTS_BY_CATEGORY: Record<string, Product[]> = {
 };
 
 export default async function CategoryPage({ params }: Props) {
-  // ✅ Promise を unwrap
   const { slug: rawSlug } = await params;
   const slug = (rawSlug ?? "").toLowerCase().trim();
 
@@ -58,10 +58,16 @@ export default async function CategoryPage({ params }: Props) {
           <Link href="/" className="text-sm hover:underline">
             ← Home
           </Link>
+
           <div className="text-xl font-serif tracking-[0.25em]">{BRAND}</div>
-          <Link href="/legal" className="text-sm hover:underline">
-            LEGAL
-          </Link>
+
+          {/* ✅ 右上：LEGAL + カート */}
+          <div className="flex items-center gap-3">
+            <Link href="/legal" className="text-sm hover:underline">
+              LEGAL
+            </Link>
+            <CartButtonClient />
+          </div>
         </div>
       </header>
 

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { useCart } from "@/app/cart/CartContext";
 
 export type Product = {
   id: string;
@@ -66,12 +67,16 @@ function Accordion({
         </div>
         <span className="text-lg leading-none">{open ? "–" : "+"}</span>
       </button>
-      {open && <div className="pb-5 text-sm text-black/70 leading-relaxed">{children}</div>}
+      {open && (
+        <div className="pb-5 text-sm text-black/70 leading-relaxed">{children}</div>
+      )}
     </div>
   );
 }
 
 export default function ProductCardClient({ p }: { p: Product }) {
+  const { addItem } = useCart();
+
   const images = p.images ?? [];
   const [imgIdx, setImgIdx] = useState(0);
 
@@ -87,6 +92,40 @@ export default function ProductCardClient({ p }: { p: Product }) {
 
   const dec = () => setQty((v) => Math.max(1, v - 1));
   const inc = () => setQty((v) => Math.min(99, v + 1));
+
+  // ✅ 色×サイズを区別するためのカート用ID
+  const cartItemId = useMemo(() => {
+    const c = (color ?? "").trim();
+    const s = (size ?? "").trim();
+    return `${p.id}__${c}__${s}`;
+  }, [p.id, color, size]);
+
+  const cartDisplayName = useMemo(() => {
+    // 例: "Checker Heart Tee (Black / M)"
+    const c = (color ?? "").trim();
+    const s = (size ?? "").trim();
+    if (!c && !s) return p.name;
+    return `${p.name} (${[c, s].filter(Boolean).join(" / ")})`;
+  }, [p.name, color, size]);
+
+  const onAddToCart = () => {
+    addItem(
+      {
+        id: cartItemId,
+        name: cartDisplayName,
+        price: p.price,
+        image: current?.src ? { src: current.src, alt: current.alt } : undefined,
+      },
+      qty
+    );
+  };
+
+  const onBuyNow = () => {
+    // ひとまず「カートに入れる」までは同じ挙動にしておく（後でStripeへ）
+    onAddToCart();
+    // 将来的に /checkout に飛ばすなら useRouter で push してOK
+    alert("カートに追加しました。右上のカートから決済に進めます。");
+  };
 
   return (
     <div className="border border-black/10 bg-white">
@@ -201,10 +240,7 @@ export default function ProductCardClient({ p }: { p: Product }) {
           <button
             type="button"
             className="w-full border border-black px-6 py-4 hover:bg-black hover:text-white transition"
-            onClick={() => {
-              // 今はダミー。将来Stripe/Cartを入れる場所
-              alert(`Added (mock): ${p.name} / ${color} / ${size} x${qty}`);
-            }}
+            onClick={onAddToCart}
           >
             カートに追加する
           </button>
@@ -212,10 +248,7 @@ export default function ProductCardClient({ p }: { p: Product }) {
           <button
             type="button"
             className="w-full bg-black text-white px-6 py-4 hover:opacity-90 transition"
-            onClick={() => {
-              // 今はダミー。将来Stripe Checkoutへ
-              alert(`Buy now (mock): ${p.name} / ${color} / ${size} x${qty}`);
-            }}
+            onClick={onBuyNow}
           >
             今すぐ購入
           </button>
