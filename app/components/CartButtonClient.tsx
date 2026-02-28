@@ -24,6 +24,7 @@ export default function CartButtonClient() {
 
   return (
     <>
+      {/* Cart icon */}
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -47,14 +48,14 @@ export default function CartButtonClient() {
         />
       )}
 
-      {/* Panel (not full height) */}
+      {/* Drawer */}
       <aside
         className={[
-          "fixed right-3 top-3 bottom-3 z-50",
-          "w-[94vw] max-w-xl",
-          "bg-white border border-black/10 shadow-lg rounded-2xl",
+          "fixed top-0 right-0 z-50 h-dvh bg-white border-l border-black/10",
+          // ✅ ここが重要：幅を太く
+          "w-[96vw] max-w-xl",
           "transform transition-transform duration-200",
-          open ? "translate-x-0" : "translate-x-[110%]",
+          open ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
         role="dialog"
         aria-modal="true"
@@ -72,17 +73,19 @@ export default function CartButtonClient() {
             </button>
           </div>
 
-          {/* Items (通常はスクロールなし。多い時だけスクロール) */}
-          <div className="px-6 py-5 overflow-y-auto">
+          {/* Items */}
+          <div className="flex-1 overflow-y-auto px-6 py-5">
             {lines.length === 0 ? (
-              <div className="py-12 text-center text-black/60 text-base">
-                カートは空です。
-              </div>
+              <div className="py-16 text-center text-black/60 text-base">カートは空です。</div>
             ) : (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {lines.map((it) => (
-                  <div key={it.id} className="flex gap-4 border border-black/10 p-4 rounded-xl">
-                    <div className="w-24 h-24 bg-black/5 overflow-hidden shrink-0 rounded-lg">
+                  <div
+                    key={it.id}
+                    className="flex gap-5 border border-black/10 rounded-2xl p-5"
+                  >
+                    {/* ✅ 画像を大きく・潰れない */}
+                    <div className="w-28 h-28 bg-black/5 overflow-hidden rounded-xl shrink-0">
                       {it.image?.src ? (
                         <img
                           src={it.image.src}
@@ -92,13 +95,15 @@ export default function CartButtonClient() {
                       ) : null}
                     </div>
 
+                    {/* ✅ 右側を広く使う */}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-base truncate">{it.name}</div>
                       <div className="text-sm text-black/70 mt-1">{it.price}</div>
 
-                      <div className="mt-4 flex flex-wrap items-center gap-3">
-                        {/* Qty controls (big & tap-friendly) */}
-                        <div className="inline-flex items-stretch border border-black/20 rounded-lg overflow-hidden">
+                      {/* Controls */}
+                      <div className="mt-4 flex items-center gap-3">
+                        {/* Qty */}
+                        <div className="inline-flex items-stretch border border-black/20 rounded-xl overflow-hidden">
                           <button
                             type="button"
                             className="w-11 h-11 grid place-items-center text-xl hover:bg-black hover:text-white transition"
@@ -120,10 +125,10 @@ export default function CartButtonClient() {
                           </button>
                         </div>
 
-                        {/* Remove button (big) */}
+                        {/* ✅ Removeを大きく */}
                         <button
                           type="button"
-                          className="ml-auto inline-flex items-center justify-center h-11 px-4 border border-black/20 rounded-lg hover:bg-black hover:text-white transition text-sm"
+                          className="ml-auto inline-flex items-center justify-center h-11 px-5 border border-black/20 rounded-xl hover:bg-black hover:text-white transition text-sm"
                           onClick={() => removeItem(it.id)}
                         >
                           Remove
@@ -136,7 +141,7 @@ export default function CartButtonClient() {
                 <button
                   type="button"
                   onClick={clear}
-                  className="text-sm h-11 px-4 rounded-lg border border-black/20 hover:bg-black hover:text-white transition"
+                  className="h-11 px-5 border border-black/20 rounded-xl hover:bg-black hover:text-white transition text-sm"
                 >
                   カートを空にする
                 </button>
@@ -145,18 +150,18 @@ export default function CartButtonClient() {
           </div>
 
           {/* Footer */}
-          <div className="mt-auto px-6 py-5 border-t border-black/10">
+          <div className="px-6 py-5 border-t border-black/10">
             <div className="flex items-center justify-between text-base">
               <span className="text-black/60">Subtotal</span>
               <span className="font-medium">{formatYen(subtotalYen)}</span>
             </div>
 
-            <div className="mt-4 grid gap-3">
+            <div className="mt-5 grid gap-3">
               <Link
                 href="/checkout"
                 onClick={() => setOpen(false)}
                 className={[
-                  "inline-flex justify-center items-center h-12 px-5 border border-black rounded-lg transition text-base",
+                  "inline-flex justify-center items-center h-12 px-5 border border-black rounded-xl transition text-base",
                   hasItems ? "hover:bg-black hover:text-white" : "opacity-40 pointer-events-none",
                 ].join(" ")}
               >
@@ -166,7 +171,7 @@ export default function CartButtonClient() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="inline-flex justify-center items-center h-12 px-5 border border-black/20 rounded-lg hover:bg-black/5 transition text-base"
+                className="inline-flex justify-center items-center h-12 px-5 border border-black/20 rounded-xl hover:bg-black/5 transition text-base"
               >
                 買い物を続ける
               </button>
