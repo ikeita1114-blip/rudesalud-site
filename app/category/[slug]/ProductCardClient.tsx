@@ -24,7 +24,9 @@ export default function ProductCardClient({ p }: { p: Product }) {
   const images = p.images ?? [];
   const [idx, setIdx] = useState(0);
 
-  const current = useMemo(() => images[idx] ?? images[0], [images, idx]);
+  const current = useMemo(() => {
+    return images[idx] ?? images[0];
+  }, [images, idx]);
 
   const canPrev = idx > 0;
   const canNext = idx < images.length - 1;
@@ -32,24 +34,28 @@ export default function ProductCardClient({ p }: { p: Product }) {
   const prev = () => setIdx((v) => Math.max(0, v - 1));
   const next = () => setIdx((v) => Math.min(images.length - 1, v + 1));
 
-  const initialColor = p.colors?.[0] ?? "Black";
-
+  const initialColor = p.colors[0] ?? "Black";
   const firstAvailableSize =
-    p.sizes.find((size) => (p.stockBySize?.[size] ?? 0) > 0) ?? p.sizes?.[0] ?? "M";
+    p.sizes.find((size) => (p.stockBySize[size] ?? 0) > 0) ?? p.sizes[0] ?? "M";
 
   const [selectedColor, setSelectedColor] = useState(initialColor);
   const [selectedSize, setSelectedSize] = useState(firstAvailableSize);
   const [quantity, setQuantity] = useState(1);
 
-  const selectedStock = p.stockBySize?.[selectedSize] ?? 0;
+  const selectedStock = p.stockBySize[selectedSize] ?? 0;
 
-  const isAllSoldOut = (p.sizes ?? []).every((size) => (p.stockBySize?.[size] ?? 0) <= 0);
+  const isAllSoldOut = p.sizes.every((size) => (p.stockBySize[size] ?? 0) <= 0);
 
-  const decreaseQty = () => setQuantity((v) => Math.max(1, v - 1));
-  const increaseQty = () => setQuantity((v) => Math.min(selectedStock, v + 1));
+  const decreaseQty = () => {
+    setQuantity((v) => Math.max(1, v - 1));
+  };
+
+  const increaseQty = () => {
+    setQuantity((v) => Math.min(selectedStock, v + 1));
+  };
 
   const handleSelectSize = (size: string) => {
-    const stock = p.stockBySize?.[size] ?? 0;
+    const stock = p.stockBySize[size] ?? 0;
     if (stock <= 0) return;
     setSelectedSize(size);
     setQuantity(1);
@@ -119,16 +125,16 @@ export default function ProductCardClient({ p }: { p: Product }) {
         <div className="mt-6">
           <div className="text-sm text-black/70">Color</div>
           <div className="mt-3 flex flex-wrap gap-3">
-            {(p.colors ?? []).map((color) => (
+            {p.colors.map((color) => (
               <button
                 key={color}
                 type="button"
                 onClick={() => setSelectedColor(color)}
-                className={`rounded-full border px-5 py-2 text-base transition ${
+                className={
                   selectedColor === color
-                    ? "border-black bg-black text-white"
-                    : "border-black/20 bg-white text-black hover:border-black"
-                }`}
+                    ? "rounded-full border border-black bg-black px-5 py-2 text-base text-white transition"
+                    : "rounded-full border border-black/20 bg-white px-5 py-2 text-base text-black transition hover:border-black"
+                }
               >
                 {color}
               </button>
@@ -139,10 +145,23 @@ export default function ProductCardClient({ p }: { p: Product }) {
         <div className="mt-6">
           <div className="text-sm text-black/70">Size</div>
           <div className="mt-3 flex flex-wrap gap-3">
-            {(p.sizes ?? []).map((size) => {
-              const stock = p.stockBySize?.[size] ?? 0;
+            {p.sizes.map((size) => {
+              const stock = p.stockBySize[size] ?? 0;
               const soldOut = stock <= 0;
               const active = selectedSize === size;
+
+              let buttonClass =
+                "rounded-full border px-5 py-2 text-base transition ";
+
+              if (soldOut) {
+                buttonClass +=
+                  "cursor-not-allowed border-black/10 bg-black/5 text-black/30";
+              } else if (active) {
+                buttonClass += "border-black bg-black text-white";
+              } else {
+                buttonClass +=
+                  "border-black/20 bg-white text-black hover:border-black";
+              }
 
               return (
                 <button
@@ -150,13 +169,7 @@ export default function ProductCardClient({ p }: { p: Product }) {
                   type="button"
                   onClick={() => handleSelectSize(size)}
                   disabled={soldOut}
-                  className={`rounded-full border px-5 py-2 text-base transition ${
-                    soldOut
-                      ? "cursor-not-allowed border-black/10 bg-black/5 text-black/30"
-                      : active
-                      ? "border-black bg-black text-white"
-                      : "border-black/20 bg-white text-black hover:border-black"
-                  }`}
+                  className={buttonClass}
                 >
                   {size}
                 </button>

@@ -1,6 +1,6 @@
 // app/category/[slug]/page.tsx
 import Link from "next/link";
-import ProductCardClient, { type Product } from "@/app/components/ProductCardClient";
+import ProductCardClient from "@/app/components/ProductCardClient";
 import CartButtonClient from "@/app/components/CartButtonClient";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +9,23 @@ const BRAND = "RUDESALUD";
 
 type Props = {
   params: Promise<{ slug: string }>;
+};
+
+type Product = {
+  id: string;
+  name: string;
+  price: string;
+  images: { src: string; alt: string }[];
+  description?: string;
+  colors: string[];
+  sizes: string[];
+  stockBySize: Record<string, number>;
+  sizeChart?: {
+    size: string;
+    body: number;
+    length: number;
+    sleeve: number;
+  }[];
 };
 
 const TITLE_MAP: Record<string, string> = {
@@ -42,7 +59,6 @@ const PRODUCTS_BY_CATEGORY: Record<string, Product[]> = {
       ],
     },
   ],
-
   bag: [],
   jacket: [],
   accessory: [],
