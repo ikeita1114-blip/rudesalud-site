@@ -7,7 +7,6 @@ export const dynamic = "force-dynamic";
 
 const BRAND = "RUDESALUD";
 
-// Next.js 16系で params が Promise になる場合があるため Promise で受ける
 type Props = {
   params: Promise<{ slug: string }>;
 };
@@ -31,17 +30,22 @@ const PRODUCTS_BY_CATEGORY: Record<string, Product[]> = {
       ],
       description:
         "反骨と上品さが同居する、RUDESALUDの象徴的グラフィック。荒さの中に、美しさを。",
-      colors: ["Black", "Red", "Light Blue", "Sport Grey", "White"],
-      sizes: ["S", "M", "L", "XL"],
+      colors: ["Black"],
+      sizes: ["M", "L"],
+      stockBySize: {
+        M: 50,
+        L: 50,
+      },
       sizeChart: [
-        { size: "S", body: 51, length: 67, sleeve: 85 },
         { size: "M", body: 56, length: 70, sleeve: 88 },
         { size: "L", body: 61, length: 73, sleeve: 90 },
-        { size: "XL", body: 66, length: 76, sleeve: 93 },
-        { size: "2XL", body: 71, length: 79, sleeve: 95 },
       ],
     },
   ],
+
+  bag: [],
+  jacket: [],
+  accessory: [],
 };
 
 export default async function CategoryPage({ params }: Props) {
@@ -53,15 +57,14 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-black/10">
-        <div className="mx-auto max-w-7xl px-5 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-20 border-b border-black/10 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link href="/" className="text-sm hover:underline">
             ← Home
           </Link>
 
           <div className="text-xl font-serif tracking-[0.25em]">{BRAND}</div>
 
-          {/* ✅ 右上：LEGAL + カート */}
           <div className="flex items-center gap-3">
             <Link href="/legal" className="text-sm hover:underline">
               LEGAL
@@ -72,7 +75,7 @@ export default async function CategoryPage({ params }: Props) {
       </header>
 
       <section className="mx-auto max-w-7xl px-5 py-10">
-        <h1 className="text-3xl md:text-4xl font-serif tracking-wide">{title}</h1>
+        <h1 className="text-3xl font-serif tracking-wide md:text-4xl">{title}</h1>
 
         {products.length > 0 ? (
           <div className="mt-10 grid gap-10 md:grid-cols-2">
@@ -89,7 +92,7 @@ export default async function CategoryPage({ params }: Props) {
             </p>
             <Link
               href="/"
-              className="mt-8 inline-flex border border-black px-8 py-3 hover:bg-black hover:text-white transition"
+              className="mt-8 inline-flex border border-black px-8 py-3 transition hover:bg-black hover:text-white"
             >
               Back to Home
             </Link>
